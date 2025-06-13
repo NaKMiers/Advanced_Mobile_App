@@ -1,9 +1,13 @@
-import 'package:advanced_mobile_app/components/onboarding/Slide1.dart';
-import 'package:advanced_mobile_app/components/onboarding/Slide2.dart';
-import 'package:advanced_mobile_app/components/onboarding/Slide3.dart';
-import 'package:advanced_mobile_app/components/onboarding/Slide4.dart';
-import 'package:advanced_mobile_app/components/onboarding/Slide5.dart';
-import 'package:advanced_mobile_app/components/onboarding/Slide6.dart';
+import 'dart:convert';
+
+import 'package:advanced_mobile_app/components/onboarding/slide1.dart';
+import 'package:advanced_mobile_app/components/onboarding/slide2.dart';
+import 'package:advanced_mobile_app/components/onboarding/slide3.dart';
+import 'package:advanced_mobile_app/components/onboarding/slide4.dart';
+import 'package:advanced_mobile_app/components/onboarding/slide5.dart';
+import 'package:advanced_mobile_app/components/onboarding/slide6.dart';
+import 'package:advanced_mobile_app/components/page_wapper.dart';
+import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,139 +19,149 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  final PageController _pageController = PageController();
-  int _currentSlide = 0;
-  List<dynamic> _formData = [];
+  int curSlide = 0;
+
+  List<dynamic> form = [];
+
+  // go to next slide
+  void nextSlide() {
+    if (curSlide < slides.length - 1) {
+      setState(() {
+        curSlide++;
+      });
+    }
+  }
+
+  late List<Widget> slides;
 
   @override
   void initState() {
     super.initState();
-    _formData = List<dynamic>.filled(6, null, growable: false);
-  }
-
-  Future<void> _handleSendReport() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('onboarding', _formData.toString());
-    // Add your sendReportApi logic here
-    print('Sending report: $_formData');
-  }
-
-  void _nextSlide() {
-    if (_currentSlide < 5) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-    }
-  }
-
-  void _prevSlide() {
-    if (_currentSlide > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-    } else {
-      Navigator.of(context).pop(); // Go back
-    }
-  }
-
-  void _resetSlides() {
-    _pageController.jumpToPage(0);
-  }
-
-  void _updateForm(int index, dynamic value) {
-    setState(() {
-      _formData[index] = value;
-    });
-    _nextSlide();
-  }
-
-  List<Widget> _buildSlides() {
-    return [
-      Slide1(onChange: (value) => _updateForm(0, value)),
-      Slide2(onChange: (value) => _updateForm(1, value)),
-      Slide3(onChange: (value) => _updateForm(2, value)),
+    slides = [
+      Slide1(
+        onChange: (value) {
+          setState(() {
+            curSlide = 1;
+            form.isEmpty ? form.add(value) : form[0] = value;
+          });
+        },
+      ),
+      Slide2(
+        onChange: (value) {
+          setState(() {
+            form.length <= 1 ? form.add(value) : form[1] = value;
+            curSlide = 2;
+          });
+        },
+      ),
+      Slide3(
+        onChange: (value) {
+          setState(() {
+            form.length <= 2 ? form.add(value) : form[2] = value;
+            curSlide = 3;
+          });
+        },
+      ),
       Slide4(
         onChange: (value) async {
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('currency', value.toString());
-          _nextSlide();
+          await prefs.setString('currency', jsonEncode(value));
+          setState(() {
+            curSlide = 4;
+          });
         },
       ),
       Slide5(
         onChange: (value) async {
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('personalities', value.toString());
-          _nextSlide();
+          await prefs.setString('personality', jsonEncode(value));
+          setState(() {
+            curSlide = 5;
+          });
         },
       ),
-      Slide6(onPress: _handleSendReport),
+      Slide6(
+        onPress: () async {
+          final prefs = await SharedPreferences.getInstance();
+
+          // Get currency and personality from SharedPreferences
+          final currency = prefs.getString('currency');
+          final personality = prefs.getString('personality');
+
+          print(currency);
+          print(personality);
+          print(form);
+
+          try {
+            await sendReportApi(form);
+
+            // Set onboarding
+            await prefs.setString('onboarding', jsonEncode(form));
+          } catch (err) {
+            print('Error: $err');
+          }
+        },
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final slides = _buildSlides();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLarge = screenWidth > 768;
 
-    return SafeArea(
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 21.0),
-          child: Column(
+    return Scaffold(
+      body: PageWrapper(
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 21, vertical: 8),
+        children: [
+          Row(
             children: [
-              // Progress Bar & Buttons
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _prevSlide,
-                    icon: const Icon(Icons.chevron_left, size: 30),
-                  ),
-                  Expanded(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: curSlide > 0
+                    ? () {
+                        setState(() {
+                          curSlide--;
+                        });
+                      }
+                    : null,
+              ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Container(
                       height: 8,
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: FractionallySizedBox(
-                          widthFactor: (_currentSlide + 1) / slides.length,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                          ),
-                        ),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: _resetSlides,
-                    icon: const Icon(Icons.refresh, size: 22),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 21),
-
-              // PageView
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: slides.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (index) {
-                    setState(() => _currentSlide = index);
-                  },
-                  itemBuilder: (_, index) => slides[index],
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 4,
+                      width: screenWidth * (curSlide + 1) / slides.length,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.restart_alt),
+                onPressed: () {
+                  setState(() {
+                    curSlide = 0;
+                    form.clear();
+                  });
+                },
               ),
             ],
           ),
-        ),
+
+          Expanded(child: slides[curSlide]),
+        ],
       ),
     );
   }

@@ -36,20 +36,17 @@ class Slide2 extends StatelessWidget {
                 ],
               ),
               child: Image.asset(
-                'assets/images/onboarding2.png',
+                'assets/images/onboarding-2.png',
                 fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'How do you feel about your finances?',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+            Text(
+              'How do you feel about your finances?',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 24),

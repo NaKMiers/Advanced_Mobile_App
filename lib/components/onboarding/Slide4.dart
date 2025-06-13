@@ -1,54 +1,5 @@
+import 'package:advanced_mobile_app/constants/settings.dart';
 import 'package:flutter/material.dart';
-
-class CurrencyType {
-  final String label;
-  final String value;
-  final String symbol;
-  final String locale;
-
-  const CurrencyType({
-    required this.label,
-    required this.value,
-    required this.symbol,
-    required this.locale,
-  });
-}
-
-// Replace this with your actual currency data
-const defaultCurrency = CurrencyType(
-  label: 'United States Dollar',
-  value: 'USD',
-  symbol: '\$',
-  locale: 'en-US',
-);
-
-const List<CurrencyType> currencies = [
-  CurrencyType(
-    label: 'United States Dollar',
-    value: 'USD',
-    symbol: '\$',
-    locale: 'en-US',
-  ),
-  CurrencyType(label: 'Euro', value: 'EUR', symbol: '€', locale: 'fr-FR'),
-  CurrencyType(
-    label: 'Japanese Yen',
-    value: 'JPY',
-    symbol: '¥',
-    locale: 'ja-JP',
-  ),
-  CurrencyType(
-    label: 'British Pound',
-    value: 'GBP',
-    symbol: '£',
-    locale: 'en-GB',
-  ),
-  CurrencyType(
-    label: 'Indian Rupee',
-    value: 'INR',
-    symbol: '₹',
-    locale: 'hi-IN',
-  ),
-];
 
 class Slide4 extends StatefulWidget {
   final void Function(String) onChange;
@@ -166,6 +117,7 @@ class _Slide4State extends State<Slide4> {
                 },
               ),
             ),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ElevatedButton(

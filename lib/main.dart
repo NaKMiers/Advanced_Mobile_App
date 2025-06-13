@@ -1,6 +1,5 @@
-import 'package:advanced_mobile_app/pages/auth/forgot_password_page.dart';
-import 'package:advanced_mobile_app/pages/auth/sign_in_page.dart';
-import 'package:advanced_mobile_app/pages/auth/sign_up_page.dart';
+import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
+import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
 import 'package:advanced_mobile_app/pages/home/calendar_page.dart';
 import 'package:advanced_mobile_app/pages/home/premium_page.dart';
@@ -9,12 +8,19 @@ import 'package:advanced_mobile_app/pages/welcome/onboarding_page.dart';
 import 'package:advanced_mobile_app/pages/welcome/welcome_page.dart';
 import 'package:advanced_mobile_app/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // ensure bindings
+  await dotenv.load(fileName: ".env");
+
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => ThemeProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -26,10 +32,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AMA',
-
       theme: Provider.of<ThemeProvider>(context).themeData,
-      home: const WelcomePage(),
+      home: const AuthLayout(initialPageIndex: 0),
       routes: {
         '/home': (context) => HomeLayout(initialPageIndex: 0),
         '/transactions': (context) => const HomeLayout(initialPageIndex: 1),
@@ -40,9 +44,9 @@ class MyApp extends StatelessWidget {
         '/streaks': (context) => const StreaksPage(),
         '/premium': (context) => const PremiumPage(),
 
-        '/sign-in': (context) => const SignInPage(),
-        '/sign-up': (context) => const SignUpPage(),
-        '/forgot-password': (context) => const ForgotPasswordPage(),
+        '/sign-in': (context) => const AuthLayout(initialPageIndex: 0),
+        '/sign-up': (context) => const AuthLayout(initialPageIndex: 1),
+        '/forgot-password': (context) => const AuthLayout(initialPageIndex: 2),
 
         '/welcome': (context) => const WelcomePage(),
         '/onboarding': (context) => const OnboardingPage(),

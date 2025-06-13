@@ -6,29 +6,26 @@ class ForgotPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageWrapper(
-        children: [
-          const Text(
-            'Forgot Password Page',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
+    return PageWrapper(
+      children: [
+        const Text(
+          'Forgot Password Page',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
 
-          // Reset password button
-          ElevatedButton(
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, '/reset-password'),
-            child: const Text('Reset Password'),
-          ),
+        // Reset password button
+        ElevatedButton(
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, '/reset-password'),
+          child: const Text('Reset Password'),
+        ),
 
-          // Back to sign in button
-          ElevatedButton(
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, '/sign-in'),
-            child: const Text('Back to Sign In'),
-          ),
-        ],
-      ),
+        // Back to sign in button
+        ElevatedButton(
+          onPressed: () => Navigator.pushReplacementNamed(context, '/sign-in'),
+          child: const Text('Back to Sign In'),
+        ),
+      ],
     );
   }
 }

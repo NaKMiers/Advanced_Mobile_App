@@ -7,18 +7,6 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final auth = context.watch<AuthProvider>();
-    // final t = AppLocalizations.of(context)!;
-
-    // Redirect logic
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (auth.user != null) {
-    //     Navigator.pushReplacementNamed(context, '/home');
-    //   } else if (auth.onboarding) {
-    //     Navigator.pushReplacementNamed(context, '/auth/sign-in');
-    //   }
-    // });
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

@@ -51,9 +51,7 @@ class Slide1 extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(12),

@@ -1,4 +1,7 @@
+import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
+import 'package:advanced_mobile_app/utils/string.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Header extends StatelessWidget implements PreferredSizeWidget {
   const Header({super.key});
@@ -8,9 +11,12 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
+
     return AppBar(
       title: Text(
-        "Hello Pi Pi! 👋",
+        "Hello ${shortName(user)} 👋",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
       ),
       leading: IconButton(
