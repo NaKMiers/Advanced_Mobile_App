@@ -225,20 +225,23 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 24),
 
                           // MARK: Google Sign-In Button
-                          ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: Image.asset(
-                              'assets/icons/google.png',
-                              height: 20,
-                              width: 20,
-                            ),
-                            label: const Text('Sign Up with Google'),
+                          ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              backgroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 36),
-                              side: BorderSide(color: Colors.grey.shade300),
+                              minimumSize: const Size(double.infinity, 48),
                             ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/google.png',
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Sign In with Facebook'),
+                              ],
+                            ),
+                            onPressed: () {},
                           ),
 
                           const SizedBox(height: 24),
@@ -313,7 +316,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                           const SizedBox(height: 24),
 
-                          // Footer
+                          // MARK: Footer
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

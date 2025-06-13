@@ -1,5 +1,7 @@
+import 'package:advanced_mobile_app/components/overview.dart';
 import 'package:advanced_mobile_app/components/page_wapper.dart';
-import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
+import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
+import 'package:advanced_mobile_app/components/wallets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,15 +10,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final user = authProvider.user;
+    final wallets = Provider.of<WalletProvider>(context).wallets;
 
     return PageWrapper(
       children: [
-        const Text(
-          'Home Page',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
+        Overview(),
+
+        const SizedBox(height: 20),
+
+        Wallets(wallets: wallets),
       ],
     );
   }

@@ -1,8 +1,9 @@
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:advanced_mobile_app/components/input.dart';
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
 import 'package:advanced_mobile_app/models/user_model.dart';
+import 'package:advanced_mobile_app/requests/auth_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -29,72 +30,6 @@ class _SignInPageState extends State<SignInPage> {
     usernameOrEmailCtl.dispose();
     passwordCtl.dispose();
     super.dispose();
-  }
-
-  // Mock JWT token for testing
-  String _generateMockToken(Map<String, dynamic> payload) {
-    final header = base64Url.encode(
-      utf8.encode(jsonEncode({'alg': 'HS256', 'typ': 'JWT'})),
-    );
-    final encodedPayload = base64Url.encode(utf8.encode(jsonEncode(payload)));
-    const mockSignature = 'mock_signature';
-    return '$header.$encodedPayload.$mockSignature';
-  }
-
-  // Simulated API calls (replace with real APIs)
-  Future<Map<String, dynamic>> signInCredentialsApi(
-    Map<String, dynamic> data,
-  ) async {
-    await Future.delayed(Duration(seconds: 1));
-    final payload = {
-      '_id': 'user${DateTime.now().millisecondsSinceEpoch}',
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
-      'username': data['usernameOrEmail'].contains('@')
-          ? 'user'
-          : data['usernameOrEmail'],
-      'email': data['usernameOrEmail'].contains('@')
-          ? data['usernameOrEmail']
-          : 'user@example.com',
-      'password': data['password'],
-      'authType': 'email',
-      'role': 'user',
-      'avatar': '',
-      'name': data['usernameOrEmail'],
-      'isDeleted': false,
-      'initiated': true,
-      'plan': null,
-      'planExpiredAt': null,
-      'purchasedAtPlatform': null,
-      'exp': (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600,
-    };
-    return {'token': _generateMockToken(payload)};
-  }
-
-  Future<Map<String, dynamic>> signInGoogleApi(
-    String idToken,
-    String userId,
-    String locale,
-  ) async {
-    await Future.delayed(Duration(seconds: 1));
-    final payload = {
-      '_id': userId,
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
-      'username': 'google_user',
-      'email': 'google_user@example.com',
-      'authType': 'google',
-      'role': 'user',
-      'avatar': '',
-      'name': 'Google User',
-      'isDeleted': false,
-      'initiated': true,
-      'plan': null,
-      'planExpiredAt': null,
-      'purchasedAtPlatform': null,
-      'exp': (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600,
-    };
-    return {'token': _generateMockToken(payload)};
   }
 
   // Validation logic
@@ -160,6 +95,74 @@ class _SignInPageState extends State<SignInPage> {
           content: Text('Sign In Failed: $e'),
           backgroundColor: Colors.red,
         ),
+      );
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  // Handle Google Sign-In
+  Future<void> handleGoogleSignIn() async {
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      // Check for Google Play Services (Android only)
+      if (Platform.isAndroid) {
+        final hasPlayServices = await googleSignIn.isSignedIn();
+        if (!hasPlayServices) {
+          throw Exception('Google Play Services not available');
+        }
+      }
+
+      // Sign in with Google
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Sign-In cancelled')),
+        );
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        throw Exception('ID token is required');
+      }
+
+      final response = await signInGoogleApi(idToken, googleUser.id, locale);
+      final token = response['token'];
+      final decodedUser = JwtDecoder.decode(token);
+      final user = User.fromJson(decodedUser);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+
+      Provider.of<AuthProvider>(context, listen: false).setUser(user);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Sign In Success'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      String errorMessage;
+      if (e.toString().contains('Google Play Services')) {
+        errorMessage = 'Play services are not available';
+      } else if (e.toString().contains('ID token')) {
+        errorMessage = 'ID token is required';
+      } else {
+        errorMessage = 'Failed to sign in with Google: $e';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
     } finally {
       setState(() {
@@ -250,20 +253,24 @@ class _SignInPageState extends State<SignInPage> {
                             style: TextStyle(color: Colors.grey.shade600),
                           ),
                           const SizedBox(height: 24),
-                          // Social Sign-In Buttons
-                          ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: Image.asset(
-                              'assets/icons/google.png',
-                              height: 20,
-                              width: 20,
-                            ),
-                            label: const Text('Sign In with Google'),
+
+                          // MARK: Google Sign-In Buttons
+                          ElevatedButton(
+                            onPressed: loading ? null : handleGoogleSignIn,
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              backgroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 36),
-                              side: BorderSide(color: Colors.grey.shade300),
+                              minimumSize: const Size(double.infinity, 48),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/google.png',
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Sign In with Facebook'),
+                              ],
                             ),
                           ),
 
@@ -297,7 +304,8 @@ class _SignInPageState extends State<SignInPage> {
                             ],
                           ),
                           const SizedBox(height: 24),
-                          // Form
+
+                          // MARK: Form
                           Input(
                             labelText: 'Username or Email',
                             controller: usernameOrEmailCtl,
@@ -340,7 +348,8 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          // Sign In Button
+
+                          // MARK: Sign In Button
                           ElevatedButton(
                             onPressed: loading ? null : handleCredentialSignIn,
                             style: ElevatedButton.styleFrom(
@@ -365,7 +374,8 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                           ),
                           const SizedBox(height: 24),
-                          // Footer
+
+                          // MARK: Footer
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

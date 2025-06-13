@@ -1,4 +1,11 @@
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
+import 'package:advanced_mobile_app/components/providers/budget_provider.dart';
+import 'package:advanced_mobile_app/components/providers/category_provider.dart';
+import 'package:advanced_mobile_app/components/providers/init_provider.dart';
+import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
+import 'package:advanced_mobile_app/components/providers/tranasction_provider.dart';
+import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
 import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
 import 'package:advanced_mobile_app/pages/home/calendar_page.dart';
@@ -12,14 +19,25 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
 Future main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // ensure bindings
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LoadProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => BudgetProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+
+        ChangeNotifierProvider(
+          create: (context) => InitProvider(context),
+          lazy: false,
+        ),
       ],
       child: const MyApp(),
     ),
