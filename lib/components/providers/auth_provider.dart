@@ -40,7 +40,7 @@ class AuthProvider extends ChangeNotifier {
         final decodedUser = JwtDecoder.decode(token);
         final user = User.fromJson(decodedUser);
         final isExpired =
-            DateTime.now().millisecondsSinceEpoch >= user.exp * 1000;
+            DateTime.now().millisecondsSinceEpoch >= user.exp! * 1000;
 
         if (!isExpired) {
           _user = user;

@@ -9,8 +9,10 @@ import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
 import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
 import 'package:advanced_mobile_app/pages/home/calendar_page.dart';
+import 'package:advanced_mobile_app/pages/home/categories_page.dart';
 import 'package:advanced_mobile_app/pages/home/premium_page.dart';
 import 'package:advanced_mobile_app/pages/home/streaks_page.dart';
+import 'package:advanced_mobile_app/pages/home/wallets_page.dart';
 import 'package:advanced_mobile_app/pages/welcome/onboarding_page.dart';
 import 'package:advanced_mobile_app/pages/welcome/welcome_page.dart';
 import 'package:advanced_mobile_app/themes/theme_provider.dart';
@@ -58,6 +60,8 @@ class MyApp extends StatelessWidget {
         '/ai': (context) => const HomeLayout(initialPageIndex: 2),
         '/budgets': (context) => const HomeLayout(initialPageIndex: 3),
         '/account': (context) => const HomeLayout(initialPageIndex: 4),
+        '/wallets': (context) => const WalletsPage(),
+        '/categories': (context) => const CategoriesPage(),
         '/calendar': (context) => const CalendarPage(),
         '/streaks': (context) => const StreaksPage(),
         '/premium': (context) => const PremiumPage(),

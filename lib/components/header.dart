@@ -15,12 +15,21 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     final user = authProvider.user;
 
     return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.primary,
       title: Text(
         "Hello ${shortName(user)} 👋",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
       ),
       leading: IconButton(
-        icon: Icon(Icons.calendar_month, size: 28),
+        icon: Icon(
+          Icons.calendar_month,
+          size: 28,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
         onPressed: () => Navigator.pushNamed(context, '/calendar'),
       ),
       actions: [

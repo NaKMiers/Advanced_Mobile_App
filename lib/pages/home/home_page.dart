@@ -15,9 +15,6 @@ class HomePage extends StatelessWidget {
     return PageWrapper(
       children: [
         Overview(),
-
-        const SizedBox(height: 20),
-
         Wallets(wallets: wallets),
       ],
     );

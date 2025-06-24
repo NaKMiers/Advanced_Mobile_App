@@ -43,10 +43,12 @@ class _WalletCardState extends State<WalletCard> {
     final balance =
         wallet.income + wallet.saving + wallet.invest - wallet.expense;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        border: Border.all(color: Colors.white, width: 1),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         children: [
           ListTile(
@@ -75,7 +77,6 @@ class _WalletCardState extends State<WalletCard> {
                           deleteWallet();
                           break;
                         case 'edit':
-                          // TODO: Navigate to update screen
                           break;
                       }
                     },
