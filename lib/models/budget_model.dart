@@ -9,8 +9,8 @@ class Budget {
   final Category category;
 
   final double amount;
-  final String begin;
-  final String end;
+  final DateTime begin;
+  final DateTime end;
 
   Budget({
     required this.id,

@@ -69,7 +69,7 @@ class _WalletsPageState extends State<WalletsPage> {
                     text: "You don't have any wallets yet, create one now!",
                   ),
                 ),
-              const SizedBox(height: 80),
+              const SizedBox(height: 200),
             ],
           ),
         ),

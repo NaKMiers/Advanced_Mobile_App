@@ -15,6 +15,14 @@ class WalletProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateWallet(Wallet wallet) {
+    final index = _wallets.indexWhere((w) => w.id == wallet.id);
+    if (index != -1) {
+      _wallets[index] = wallet;
+      notifyListeners();
+    }
+  }
+
   void setDefaultWallet(Wallet? wallet) {
     _defaultWallet = wallet;
     notifyListeners();

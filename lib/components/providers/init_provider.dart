@@ -1,9 +1,8 @@
-import 'package:advanced_mobile_app/models/wallet_model.dart' as app_models;
-import 'package:advanced_mobile_app/models/category_model.dart' as app_models;
 import 'package:advanced_mobile_app/models/budget_model.dart' as app_models;
+import 'package:advanced_mobile_app/models/category_model.dart' as app_models;
 import 'package:advanced_mobile_app/models/settings_model.dart' as app_models;
+import 'package:advanced_mobile_app/models/wallet_model.dart' as app_models;
 import 'package:advanced_mobile_app/requests/index.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,14 +18,25 @@ class InitProvider extends ChangeNotifier {
 
   InitProvider(this.context) {
     context.read<AuthProvider>().addListener(_onUserChanged);
+    context.read<LoadProvider>().addListener(_onRefreshPointChanged);
+  }
+
+  void _onUserChanged() {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.user != null) {
+      _init();
+    }
+  }
+
+  void _onRefreshPointChanged() {
+    _init();
   }
 
   Future<void> _init() async {
     print('🔄 InitProvider: starting _init');
 
-    final authProvider = context.read<AuthProvider>();
-    if (authProvider.user == null) return;
-    print('🔄 InitProvider: starting _init2');
+    final user = context.read<AuthProvider>().user;
+    if (user == null) return;
 
     final walletProvider = context.read<WalletProvider>();
     final categoryProvider = context.read<CategoryProvider>();
@@ -75,7 +85,7 @@ class InitProvider extends ChangeNotifier {
       categoryProvider.setLoading(false);
       budgetProvider.setLoading(false);
       settingsProvider.setLoading(false);
-      context.read<LoadProvider>().setRefreshing(false);
+      // context.read<LoadProvider>().setRefreshing(false);
     }
   }
 
@@ -98,13 +108,6 @@ class InitProvider extends ChangeNotifier {
       print('Settings error: $e');
     } finally {
       settingsProvider.setLoading(false);
-    }
-  }
-
-  void _onUserChanged() {
-    final authProvider = context.read<AuthProvider>();
-    if (authProvider.user != null) {
-      _init();
     }
   }
 }

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
 class LoadProvider extends ChangeNotifier {
-  bool _refreshing = false;
-  int _refreshPoint = 0;
+  // bool _refreshing = false;
+  DateTime _refreshPoint = DateTime.now();
 
-  bool get refreshing => _refreshing;
-  int get refreshPoint => _refreshPoint;
+  // bool get refreshing => _refreshing;
+  DateTime get refreshPoint => _refreshPoint;
 
-  void setRefreshing(bool value) {
-    _refreshing = value;
-    notifyListeners();
-  }
+  // void setRefreshing(bool value) {
+  //   _refreshing = value;
+  //   notifyListeners();
+  // }
 
   void refresh() {
-    _refreshPoint++;
-    _refreshing = true;
+    _refreshPoint = DateTime.now();
+    // _refreshing = true;
     notifyListeners();
   }
 }

@@ -39,7 +39,7 @@ class OverviewItem extends StatelessWidget {
                 Text(
                   formatCurrency(currency, value),
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     fontSize: 18,
                   ),
                 )

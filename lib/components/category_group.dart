@@ -7,8 +7,11 @@ class CategoryGroup extends StatelessWidget {
   final String type;
   final List<dynamic> categories;
 
-  const CategoryGroup({Key? key, required this.type, required this.categories})
-    : super(key: key);
+  const CategoryGroup({
+    super.key,
+    required this.type,
+    required this.categories,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,7 @@ class CategoryGroup extends StatelessWidget {
                   onPressed: () => Navigator.pushNamed(
                     context,
                     '/create-category',
-                    arguments: {'type': type},
+                    arguments: type,
                   ),
                   icon: const Icon(Icons.add, size: 16),
                   label: const Text('New Category'),

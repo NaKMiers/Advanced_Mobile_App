@@ -36,30 +36,35 @@ class Wallets extends StatelessWidget {
                 ),
 
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/create-wallet'),
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Colors.white, width: 2),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        width: 1,
+                      ),
                     ),
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 12,
+                      vertical: 8,
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "New Wallet",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: wallets
                     .map(
                       (wallet) => Container(

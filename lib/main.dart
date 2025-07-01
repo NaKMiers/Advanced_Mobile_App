@@ -6,7 +6,14 @@ import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/components/providers/tranasction_provider.dart';
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
+import 'package:advanced_mobile_app/models/category_model.dart';
+import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
+import 'package:advanced_mobile_app/pages/drawers/create_budget.dart';
+import 'package:advanced_mobile_app/pages/drawers/create_category.dart';
+import 'package:advanced_mobile_app/pages/drawers/create_wallet.dart';
+import 'package:advanced_mobile_app/pages/drawers/update_category.dart';
+import 'package:advanced_mobile_app/pages/drawers/update_wallet.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
 import 'package:advanced_mobile_app/pages/home/calendar_page.dart';
 import 'package:advanced_mobile_app/pages/home/categories_page.dart';
@@ -72,6 +79,33 @@ class MyApp extends StatelessWidget {
 
         '/welcome': (context) => const WelcomePage(),
         '/onboarding': (context) => const OnboardingPage(),
+
+        '/create-wallet': (context) => const CreateWalletPage(),
+        '/create-budget': (context) => const CreateBudgetPage(),
+      },
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/update-wallet':
+            Wallet wallet = settings.arguments as Wallet;
+            return MaterialPageRoute(
+              builder: (_) => UpdateWalletPage(wallet: wallet),
+            );
+
+          case '/create-category':
+            String? type = settings.arguments as String?;
+            return MaterialPageRoute(
+              builder: (_) => CreateCategoryPage(type: type),
+            );
+
+          case '/update-category':
+            Category category = settings.arguments as Category;
+            return MaterialPageRoute(
+              builder: (_) => UpdateCategoryPage(category: category),
+            );
+
+          default:
+            return null;
+        }
       },
       debugShowCheckedModeBanner: false,
     );

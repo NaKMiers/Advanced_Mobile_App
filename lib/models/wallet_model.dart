@@ -5,7 +5,7 @@ class Wallet {
 
   final String user;
   final String name;
-  final String icon;
+  final String? icon;
   final bool exclude;
 
   final double income;
@@ -48,5 +48,24 @@ class Wallet {
       invest: (json['invest'] ?? 0).toDouble(),
       transfer: (json['transfer'] ?? 0).toDouble(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+
+      'user': user,
+      'name': name,
+      'icon': icon,
+      'exclude': exclude,
+
+      'income': income,
+      'expense': expense,
+      'saving': saving,
+      'invest': invest,
+      'transfer': transfer,
+    };
   }
 }

@@ -21,11 +21,7 @@ String formatDate(DateTime date, {String? locale}) {
 }
 
 // Format time range (e.g., "Today", "This week", or "DD/MM - DD/MM/YYYY")
-String formatTimeRange(
-  String begin,
-  String end,
-  String Function(String) translate,
-) {
+String formatTimeRange(String begin, String end) {
   final beginDate = DateTime.parse(begin);
   final endDate = DateTime.parse(end);
   final now = DateTime.now();
@@ -60,46 +56,44 @@ String formatTimeRange(
   final nextYearStart = DateTime(now.year + 1, 1, 1);
   final nextYearEnd = DateTime(now.year + 1, 12, 31, 23, 59, 59);
 
-  if (isToday(beginDate) && isToday(endDate)) return translate('Today');
-  if (isTomorrow(beginDate) && isTomorrow(endDate))
-    return translate('Tomorrow');
-  if (isYesterday(beginDate) && isYesterday(endDate))
-    return translate('Yesterday');
+  if (isToday(beginDate) && isToday(endDate)) return 'Today';
+  if (isTomorrow(beginDate) && isTomorrow(endDate)) return 'Tomorrow';
+  if (isYesterday(beginDate) && isYesterday(endDate)) return 'Yesterday';
   if (isSameDate(beginDate, thisWeekStart) &&
       isSameDate(endDate, thisWeekEnd)) {
-    return translate('This week');
+    return 'This week';
   }
   if (isSameDate(beginDate, lastWeekStart) &&
       isSameDate(endDate, lastWeekEnd)) {
-    return translate('Last week');
+    return 'Last week';
   }
   if (isSameDate(beginDate, nextWeekStart) &&
       isSameDate(endDate, nextWeekEnd)) {
-    return translate('Next week');
+    return 'Next week';
   }
   if (isSameDate(beginDate, thisMonthStart) &&
       isSameDate(endDate, thisMonthEnd)) {
-    return translate('This month');
+    return 'This month';
   }
   if (isSameDate(beginDate, lastMonthStart) &&
       isSameDate(endDate, lastMonthEnd)) {
-    return translate('Last month');
+    return 'Last month';
   }
   if (isSameDate(beginDate, nextMonthStart) &&
       isSameDate(endDate, nextMonthEnd)) {
-    return translate('Next month');
+    return 'Next month';
   }
   if (isSameDate(beginDate, thisYearStart) &&
       isSameDate(endDate, thisYearEnd)) {
-    return translate('This year');
+    return 'This year';
   }
   if (isSameDate(beginDate, lastYearStart) &&
       isSameDate(endDate, lastYearEnd)) {
-    return translate('Last year');
+    return 'Last year';
   }
   if (isSameDate(beginDate, nextYearStart) &&
       isSameDate(endDate, nextYearEnd)) {
-    return translate('Next year');
+    return 'Next year';
   }
 
   final beginFormat = isSameYear(beginDate, endDate) ? 'dd/MM' : 'dd/MM/yyyy';

@@ -50,7 +50,7 @@ class _CalendarPageState extends State<CalendarPage> {
       setState(() {
         _loading = false;
       });
-      Provider.of<LoadProvider>(context, listen: false).setRefreshing(false);
+      // Provider.of<LoadProvider>(context, listen: false).setRefreshing(false);
     }
   }
 

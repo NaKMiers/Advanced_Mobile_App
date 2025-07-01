@@ -1,4 +1,5 @@
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
+import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/themes/light_theme.dart';
 import 'package:advanced_mobile_app/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final loadProvider = Provider.of<LoadProvider>(context);
     final user = authProvider.user;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isLightTheme = themeProvider.themeData == lightTheme;
@@ -27,7 +29,7 @@ class AccountPage extends StatelessWidget {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () => authProvider.refreshToken(),
+        onRefresh: () async => loadProvider.refresh(),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
