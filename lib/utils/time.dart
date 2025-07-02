@@ -21,9 +21,9 @@ String formatDate(DateTime date, {String? locale}) {
 }
 
 // Format time range (e.g., "Today", "This week", or "DD/MM - DD/MM/YYYY")
-String formatTimeRange(String begin, String end) {
-  final beginDate = DateTime.parse(begin);
-  final endDate = DateTime.parse(end);
+String formatTimeRange(DateTime begin, DateTime end) {
+  final beginDate = DateTime.parse(begin.toIso8601String());
+  final endDate = DateTime.parse(end.toIso8601String());
   final now = DateTime.now();
 
   // Week calculations (assuming week starts on Sunday)

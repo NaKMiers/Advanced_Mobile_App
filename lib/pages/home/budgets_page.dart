@@ -16,20 +16,27 @@ class _BudgetsPageState extends State<BudgetsPage> {
   List<List<dynamic>> groups = [];
   String? selectedTab;
   List<String> tabLabels = [];
-  bool adLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _groupBudgets());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      groupBudgets();
+      context.read<BudgetProvider>().addListener(_onBudgetChanged);
+    });
   }
 
-  void _groupBudgets() {
+  void _onBudgetChanged() {
+    groupBudgets();
+  }
+
+  void groupBudgets() {
     final budgets = context.read<BudgetProvider>().budgets;
+
     final Map<String, Map<String, dynamic>> grouped = {};
 
     for (var budget in budgets) {
-      final key = '${budget.begin}-${budget.end}';
+      final key = '${budget.begin.toString()}-${budget.end.toString()}';
       grouped.putIfAbsent(
         key,
         () => {'begin': budget.begin, 'end': budget.end, 'budgets': <Budget>[]},
@@ -38,6 +45,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
     }
 
     final result = grouped.entries.map((e) => [e.key, e.value]).toList();
+
+    print(result);
 
     setState(() {
       groups = result;
@@ -53,6 +62,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
           )
           .toList();
     });
+
+    print(tabLabels);
   }
 
   @override

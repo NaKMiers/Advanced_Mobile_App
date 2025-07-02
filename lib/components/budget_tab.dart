@@ -3,6 +3,7 @@ import 'package:advanced_mobile_app/components/budget_card.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/utils/string.dart';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/flutter_percent_indicator.dart';
 import 'package:provider/provider.dart';
 
 class BudgetTab extends StatelessWidget {
@@ -33,62 +34,135 @@ class BudgetTab extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
+          color: Theme.of(context).colorScheme.primary,
           margin: const EdgeInsets.all(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(21),
             child: Column(
               children: [
-                Text("Amount you can spend"),
+                Text(
+                  "Amount you can spend",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
                   formatCurrency(currency, total - amount),
-                  style: const TextStyle(fontSize: 28, color: Colors.green),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    color: Colors.lightGreenAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                // LinearPercentIndicator(
-                //   lineHeight: 8,
-                //   percent: (amount / total).clamp(0.0, 1.0),
-                //   progressColor: Colors.green,
-                //   backgroundColor: Colors.grey[300],
-                // ),
                 const SizedBox(height: 12),
+                LinearPercentIndicator(
+                  lineHeight: 8,
+                  percent: (amount / total).clamp(0.0, 1.0),
+                  progressColor: Colors.green,
+                  backgroundColor: Colors.grey[300],
+                  barRadius: const Radius.circular(16),
+                ),
+                const SizedBox(height: 21),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
-                        Text(formatCurrency(currency, total)),
-                        const Text("Total budgets"),
+                        Text(
+                          formatCurrency(currency, total),
+                          style: TextStyle(
+                            color: Colors.purple[300],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          "Total budgets",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
-                        Text(formatCurrency(currency, amount)),
-                        const Text("Total spent"),
+                        Text(
+                          formatCurrency(currency, amount),
+                          style: TextStyle(
+                            color: Colors.purple[300],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          "Total spent",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
+                const SizedBox(height: 21),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
-                        Text("$daysLeft day${daysLeft == 1 ? '' : 's'}"),
-                        const Text("End of month"),
+                        Text(
+                          "$daysLeft day${daysLeft == 1 ? '' : 's'}",
+                          style: TextStyle(
+                            color: Colors.purple[300],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          "End of month",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
-                        Text(formatCurrency(currency, dailyLimit) + "/day"),
-                        const Text("Daily limit"),
+                        Text(
+                          formatCurrency(currency, dailyLimit) + "/day",
+                          style: TextStyle(
+                            color: Colors.purple[300],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          "Daily limit",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
+                const SizedBox(height: 21),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/create-budget');
+                    Navigator.pushNamed(
+                      context,
+                      '/create-budget',
+                      arguments: {'begin': begin, 'end': end},
+                    );
                   },
-                  child: const Text("Create Budget"),
+                  child: Text(
+                    "Create Budget",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -97,6 +171,7 @@ class BudgetTab extends StatelessWidget {
         ...budgets
             .map<Widget>((b) => BudgetCard(budget: b, begin: begin, end: end))
             .toList(),
+        const SizedBox(height: 200),
       ],
     );
   }

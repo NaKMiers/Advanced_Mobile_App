@@ -8,6 +8,7 @@ class Budget {
   final String user;
   final Category category;
 
+  final double total;
   final double amount;
   final DateTime begin;
   final DateTime end;
@@ -20,6 +21,7 @@ class Budget {
     required this.user,
     required this.category,
 
+    required this.total,
     required this.amount,
     required this.begin,
     required this.end,
@@ -33,9 +35,11 @@ class Budget {
 
       user: json['user'],
       category: Category.fromJson(json['category']),
+
+      total: (json['total'] ?? 0).toDouble(),
       amount: (json['amount'] ?? 0).toDouble(),
-      begin: json['begin'] ?? '',
-      end: json['end'] ?? '',
+      begin: DateTime.parse(json['begin'] ?? ''),
+      end: DateTime.parse(json['end'] ?? ''),
     );
   }
 }

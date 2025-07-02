@@ -1,24 +1,22 @@
-import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
-import 'package:advanced_mobile_app/components/providers/budget_provider.dart';
 import 'package:advanced_mobile_app/components/providers/category_provider.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/models/budget_model.dart';
 import 'package:advanced_mobile_app/models/category_model.dart';
 import 'package:advanced_mobile_app/requests/budget_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class CreateBudgetPage extends StatefulWidget {
-  final DateTime? begin;
-  final DateTime? end;
+class UpdateBudgetPage extends StatefulWidget {
+  final Budget budget;
 
-  const CreateBudgetPage({super.key, this.begin, this.end});
+  const UpdateBudgetPage({super.key, required this.budget});
 
   @override
-  State<CreateBudgetPage> createState() => _CreateBudgetPageState();
+  State<UpdateBudgetPage> createState() => _UpdateBudgetPageState();
 }
 
-class _CreateBudgetPageState extends State<CreateBudgetPage> {
+class _UpdateBudgetPageState extends State<UpdateBudgetPage> {
   final formKey = GlobalKey<FormState>();
   final totalController = TextEditingController();
   DateTimeRange? dateRange;
@@ -26,37 +24,33 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
   bool saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    totalController.text = widget.budget.total.toString();
+    selectedCategory = widget.budget.category;
+
+    dateRange = DateTimeRange(
+      start: widget.budget.begin,
+      end: widget.budget.end,
+    );
+  }
+
+  @override
   void dispose() {
     totalController.dispose();
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    selectedCategory = context.read<CategoryProvider>().categories.firstWhere(
-      (c) => c.type == 'expense' && !c.deletable,
-    );
-
-    // if widget.begin and widget.end are provided, set dateRange
-    if (widget.begin != null && widget.end != null) {
-      final begin = widget.begin!;
-      final end = widget.end!;
-      dateRange = DateTimeRange(start: begin, end: end);
-    }
-  }
-
   void showCategoryPicker() {
+    final categories = context.read<CategoryProvider>().categories;
     showModalBottomSheet(
       context: context,
       builder: (_) {
-        final categories = context
-            .read<CategoryProvider>()
-            .categories
+        final expenseCates = categories
             .where((c) => c.type == 'expense')
             .toList();
         return ListView(
-          children: categories
+          children: expenseCates
               .map(
                 (c) => ListTile(
                   leading: Text(c.icon),
@@ -75,6 +69,15 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
     );
   }
 
+  /// check if user has changed any field
+  bool hasChanged() {
+    if (selectedCategory?.id != widget.budget.category.id) return true;
+    if (totalController.text != widget.budget.total.toString()) return true;
+    if (dateRange?.start != widget.budget.begin) return true;
+    if (dateRange?.end != widget.budget.end) return true;
+    return false;
+  }
+
   Future<void> _handleSave() async {
     if (!formKey.currentState!.validate()) return;
 
@@ -91,37 +94,16 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
       return;
     }
 
-    final isPremium = context.read<AuthProvider>().isPremium;
-    final budgetProvider = context.read<BudgetProvider>();
-
-    if (!isPremium && budgetProvider.budgets.length >= 4) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Upgrade to Premium"),
-          content: const Text("You've reached the budget limit of 4"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, "/premium");
-              },
-              child: const Text("Upgrade Now"),
-            ),
-          ],
-        ),
-      );
+    // check no changes
+    if (!hasChanged()) {
+      Navigator.pop(context);
       return;
     }
 
     setState(() => saving = true);
 
     try {
-      await createBudgetApi({
+      await updateBudgetApi(widget.budget.id, {
         'total': double.tryParse(totalController.text.trim()),
         'categoryId': selectedCategory!.id,
         'begin': dateRange!.start.toUtc().toIso8601String(),
@@ -129,7 +111,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Budget created successfully!")),
+        const SnackBar(content: Text("Budget updated successfully!")),
       );
 
       context.read<LoadProvider>().refresh();
@@ -137,7 +119,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Failed to create budget")));
+      ).showSnackBar(const SnackBar(content: Text("Failed to update budget")));
     } finally {
       setState(() => saving = false);
     }
@@ -150,7 +132,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Create Budget",
+          "Update Budget",
           style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
         ),
       ),
@@ -215,9 +197,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
                   alignment: Alignment.centerLeft,
                   child: selectedCategory != null
                       ? Text(
-                          selectedCategory!.icon +
-                              '   ' +
-                              selectedCategory!.name,
+                          "${selectedCategory!.icon}   ${selectedCategory!.name}",
                         )
                       : const Text("Select category"),
                 ),
@@ -237,6 +217,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
                     context: context,
                     firstDate: DateTime(2020),
                     lastDate: DateTime(2100),
+                    initialDateRange: dateRange,
                   );
                   if (picked != null) {
                     setState(() => dateRange = picked);
@@ -263,18 +244,18 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
 
               const SizedBox(height: 24),
 
-              // Save button
+              // MARK: Save + Cancel
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                spacing: 21,
                 children: [
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel"),
+                    child: const Text("Cancel"),
                   ),
+                  const SizedBox(width: 16),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: theme.colorScheme.primary,
                     ),
                     onPressed: saving ? null : _handleSave,
                     child: saving
@@ -286,7 +267,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
                         : Text(
                             'Save',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           ),
                   ),

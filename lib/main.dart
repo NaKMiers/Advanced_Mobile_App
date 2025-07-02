@@ -6,12 +6,14 @@ import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/components/providers/tranasction_provider.dart';
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
+import 'package:advanced_mobile_app/models/budget_model.dart';
 import 'package:advanced_mobile_app/models/category_model.dart';
 import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_budget.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_category.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_wallet.dart';
+import 'package:advanced_mobile_app/pages/drawers/update_budget.dart';
 import 'package:advanced_mobile_app/pages/drawers/update_category.dart';
 import 'package:advanced_mobile_app/pages/drawers/update_wallet.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
@@ -81,7 +83,6 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => const OnboardingPage(),
 
         '/create-wallet': (context) => const CreateWalletPage(),
-        '/create-budget': (context) => const CreateBudgetPage(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -101,6 +102,20 @@ class MyApp extends StatelessWidget {
             Category category = settings.arguments as Category;
             return MaterialPageRoute(
               builder: (_) => UpdateCategoryPage(category: category),
+            );
+
+          case '/create-budget':
+            final args = settings.arguments as Map<String, dynamic>?;
+            DateTime? begin = args?['begin'] as DateTime?;
+            DateTime? end = args?['end'] as DateTime?;
+            return MaterialPageRoute(
+              builder: (_) => CreateBudgetPage(begin: begin, end: end),
+            );
+
+          case '/update-budget':
+            Budget budget = settings.arguments as Budget;
+            return MaterialPageRoute(
+              builder: (_) => UpdateBudgetPage(budget: budget),
             );
 
           default:

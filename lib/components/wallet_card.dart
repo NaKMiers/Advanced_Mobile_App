@@ -58,7 +58,7 @@ class _WalletCardState extends State<WalletCard> {
       await deleteWalletApi(widget.wallet.id);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Wallet created successfully!')),
+        const SnackBar(content: Text('Wallet deleted successfully!')),
       );
 
       context.read<LoadProvider>().refresh();
