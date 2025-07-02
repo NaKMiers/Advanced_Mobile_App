@@ -52,9 +52,8 @@ class _TransactionTypeGroupState extends State<TransactionTypeGroup> {
             });
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             decoration: BoxDecoration(
-              // color: Colors.grey.shade200,
               border: Border(
                 left: BorderSide(color: typeStyle['color'], width: 3),
               ),
@@ -103,25 +102,36 @@ class _TransactionTypeGroupState extends State<TransactionTypeGroup> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'add') {
-                      Navigator.pushNamed(
-                        context,
-                        '/create-transaction',
-                        arguments: {'type': widget.type},
-                      );
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem<String>(
-                      value: 'add',
-                      child: TextButton(
-                        onPressed: () {},
-                        child: const Text('Add Transaction'),
+                Container(
+                  height: 40,
+                  width: 24,
+                  margin: const EdgeInsets.only(left: 8),
+                  child: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'add') {
+                        Navigator.pushNamed(
+                          context,
+                          '/create-transaction',
+                          arguments: {'type': widget.type},
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem<String>(
+                        value: 'add',
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/create-transaction',
+                              arguments: {'type': widget.type},
+                            );
+                          },
+                          child: const Text('Add Transaction'),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -145,7 +155,7 @@ class _TransactionTypeGroupState extends State<TransactionTypeGroup> {
                   .toList(),
             ),
           ),
-          crossFadeState: collapsed
+          crossFadeState: !collapsed
               ? CrossFadeState.showFirst
               : CrossFadeState.showSecond,
           duration: const Duration(milliseconds: 200),

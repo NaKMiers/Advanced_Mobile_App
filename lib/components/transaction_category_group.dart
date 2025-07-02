@@ -65,7 +65,11 @@ class TransactionCategoryGroup extends StatelessWidget {
               OutlinedButton(
                 onPressed: () {
                   // Dispatch setSelectedCategory and navigate
-                  Navigator.pushNamed(context, '/create-transaction');
+                  Navigator.pushNamed(
+                    context,
+                    '/create-transaction',
+                    arguments: {'category': category},
+                  );
                 },
                 child: const Text("Add Transaction"),
               ),

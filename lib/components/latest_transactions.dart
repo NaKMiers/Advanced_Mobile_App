@@ -1,7 +1,9 @@
+import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/transaction.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LatestTransactions extends StatefulWidget {
   const LatestTransactions({super.key});
@@ -43,6 +45,13 @@ class _LatestTransactionsState extends State<LatestTransactions> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchTransactions();
+      context.read<LoadProvider>().addListener(_onRefreshPointChanged);
+    });
+  }
+
+  void _onRefreshPointChanged() {
     fetchTransactions();
   }
 

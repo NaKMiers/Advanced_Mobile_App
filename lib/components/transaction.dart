@@ -1,5 +1,7 @@
+import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
+import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +17,55 @@ class TransactionCard extends StatefulWidget {
 
 class _TransactionCardState extends State<TransactionCard> {
   bool deleting = false;
+  bool duplicating = false;
+
+  // delete transaction
+  void deleteTransaction(BuildContext context) async {
+    setState(() => deleting = true);
+
+    try {
+      await deleteTransactionApi(widget.transaction.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction deleted successfully!')),
+      );
+
+      context.read<LoadProvider>().refresh();
+    } catch (err) {
+      print("Error deleting transaction: $err");
+    } finally {
+      setState(() => deleting = false);
+    }
+  }
+
+  // duplicate transaction
+  void duplicateTransaction() async {
+    setState(() => duplicating = true);
+
+    try {
+      await createTransactionApi({
+        "name": widget.transaction.name,
+        "amount": widget.transaction.amount,
+        "type": widget.transaction.type,
+        "walletId": widget.transaction.wallet.id,
+        "categoryId": widget.transaction.category.id,
+        "date": DateTime.now().toUtc().toIso8601String(),
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Transaction duplicated")));
+
+      context.read<LoadProvider>().refresh();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to duplicate transaction")),
+      );
+      debugPrint(e.toString());
+    } finally {
+      setState(() => duplicating = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,20 +152,54 @@ class _TransactionCardState extends State<TransactionCard> {
               height: 24,
               width: 24,
               margin: const EdgeInsets.only(left: 8),
-              child: deleting
+              child: deleting || duplicating
                   ? CircularProgressIndicator(strokeWidth: 2)
                   : PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert),
                       padding: EdgeInsets.zero,
                       onSelected: (value) {
                         switch (value) {
+                          case 'duplicate':
+                            duplicateTransaction();
+                            break;
                           case 'delete':
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Delete Transaction"),
+                                content: const Text(
+                                  "Are you sure you want to delete this transaction?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      deleteTransaction(context);
+                                    },
+                                    child: const Text("Delete"),
+                                  ),
+                                ],
+                              ),
+                            );
                             break;
                           case 'edit':
+                            Navigator.pushNamed(
+                              context,
+                              '/edit-transaction',
+                              arguments: widget.transaction,
+                            );
                             break;
                         }
                       },
                       itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'duplicate',
+                          child: Text("Duplicate"),
+                        ),
                         const PopupMenuItem(value: 'edit', child: Text("Edit")),
                         const PopupMenuItem(
                           value: 'delete',

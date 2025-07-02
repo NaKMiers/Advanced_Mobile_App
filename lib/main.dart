@@ -8,13 +8,16 @@ import 'package:advanced_mobile_app/components/providers/tranasction_provider.da
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
 import 'package:advanced_mobile_app/models/budget_model.dart';
 import 'package:advanced_mobile_app/models/category_model.dart';
+import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:advanced_mobile_app/pages/auth/_auth_layout.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_budget.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_category.dart';
+import 'package:advanced_mobile_app/pages/drawers/create_transaction.dart';
 import 'package:advanced_mobile_app/pages/drawers/create_wallet.dart';
 import 'package:advanced_mobile_app/pages/drawers/update_budget.dart';
 import 'package:advanced_mobile_app/pages/drawers/update_category.dart';
+import 'package:advanced_mobile_app/pages/drawers/update_transaction.dart';
 import 'package:advanced_mobile_app/pages/drawers/update_wallet.dart';
 import 'package:advanced_mobile_app/pages/home/_home_layout.dart';
 import 'package:advanced_mobile_app/pages/home/calendar_page.dart';
@@ -81,29 +84,31 @@ class MyApp extends StatelessWidget {
 
         '/welcome': (context) => const WelcomePage(),
         '/onboarding': (context) => const OnboardingPage(),
-
-        '/create-wallet': (context) => const CreateWalletPage(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
+          // WALLETS
+          case '/create-wallet':
+            return MaterialPageRoute(builder: (_) => const CreateWalletPage());
           case '/update-wallet':
             Wallet wallet = settings.arguments as Wallet;
             return MaterialPageRoute(
               builder: (_) => UpdateWalletPage(wallet: wallet),
             );
 
+          // CATEGORIES
           case '/create-category':
             String? type = settings.arguments as String?;
             return MaterialPageRoute(
               builder: (_) => CreateCategoryPage(type: type),
             );
-
           case '/update-category':
             Category category = settings.arguments as Category;
             return MaterialPageRoute(
               builder: (_) => UpdateCategoryPage(category: category),
             );
 
+          // BUDGETS
           case '/create-budget':
             final args = settings.arguments as Map<String, dynamic>?;
             DateTime? begin = args?['begin'] as DateTime?;
@@ -111,11 +116,29 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (_) => CreateBudgetPage(begin: begin, end: end),
             );
-
           case '/update-budget':
             Budget budget = settings.arguments as Budget;
             return MaterialPageRoute(
               builder: (_) => UpdateBudgetPage(budget: budget),
+            );
+
+          // TRANSACTIONS
+          case '/create-transaction':
+            final args = settings.arguments as Map<String, dynamic>?;
+            Wallet? wallet = args?['wallet'] as Wallet?;
+            Category? category = args?['category'] as Category?;
+            String? type = args?['type'] as String?;
+            return MaterialPageRoute(
+              builder: (_) => CreateTransactionPage(
+                wallet: wallet,
+                category: category,
+                type: type,
+              ),
+            );
+          case '/update-transaction':
+            Transaction transaction = settings.arguments as Transaction;
+            return MaterialPageRoute(
+              builder: (_) => UpdateTransactionPage(transaction: transaction),
             );
 
           default:

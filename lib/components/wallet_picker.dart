@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class WalletPicker extends StatefulWidget {
+  final Function(Wallet?) onSelectWallet;
+
+  const WalletPicker({super.key, required this.onSelectWallet});
+
   @override
   State<WalletPicker> createState() => _WalletPickerState();
 }
@@ -22,22 +26,35 @@ class _WalletPickerState extends State<WalletPicker> {
       ),
       value: selectedWallet,
       onChanged: (value) {
+        widget.onSelectWallet(value);
         setState(() {
           selectedWallet = value;
         });
       },
-      items: wallets.map((wallet) {
-        return DropdownMenuItem(
-          value: wallet,
+      items: [
+        DropdownMenuItem(
+          value: null,
           child: Row(
             children: [
-              Text(wallet.icon ?? '💰'),
+              Text('🅰️'),
               const SizedBox(width: 8),
-              Text(wallet.name),
+              Text('All wallets'),
             ],
           ),
-        );
-      }).toList(),
+        ),
+        ...wallets.map((wallet) {
+          return DropdownMenuItem(
+            value: wallet,
+            child: Row(
+              children: [
+                Text(wallet.icon ?? ''),
+                const SizedBox(width: 8),
+                Text(wallet.name),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 }

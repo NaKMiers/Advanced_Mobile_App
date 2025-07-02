@@ -1,13 +1,6 @@
+import 'package:advanced_mobile_app/constants/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-// Currencies constant (adjust based on your constants/settings)
-const List<Map<String, String>> currencies = [
-  {'value': 'USD', 'symbol': '\$', 'locale': 'en-US'},
-  {'value': 'EUR', 'symbol': '€', 'locale': 'fr-FR'},
-  {'value': 'GBP', 'symbol': '£', 'locale': 'en-GB'},
-  {'value': 'VND', 'symbol': '₫', 'locale': 'vi-VN'},
-];
 
 // Get short name from user (name, username, or email prefix)
 String shortName(dynamic user, {String defaultValue = ''}) {
@@ -22,18 +15,12 @@ String shortName(dynamic user, {String defaultValue = ''}) {
 
 // Get currency symbol
 String formatSymbol(String currency) {
-  return currencies.firstWhere(
-    (c) => c['value'] == currency,
-    orElse: () => {'symbol': ''},
-  )['symbol']!;
+  return currencies.firstWhere((c) => c.value == currency).symbol;
 }
 
 // Format amount as currency
 String formatCurrency(String currency, double amount) {
-  final locale = currencies.firstWhere(
-    (c) => c['value'] == currency,
-    orElse: () => {'locale': 'en-US'},
-  )['locale']!;
+  final locale = currencies.firstWhere((c) => c.value == currency).locale;
   return NumberFormat.currency(
     locale: locale,
     symbol: formatSymbol(currency),
