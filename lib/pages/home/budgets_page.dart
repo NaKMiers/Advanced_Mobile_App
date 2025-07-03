@@ -117,12 +117,12 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 ),
         ),
       ),
+      // Floating Add Button
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, '/create-budget');
-        },
-        label: const Text('Create Budget'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        onPressed: () => Navigator.pushNamed(context, '/create-budget'),
         icon: const Icon(Icons.add),
+        label: const Text("Create Budget"),
       ),
     );
   }

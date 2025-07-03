@@ -189,7 +189,7 @@ class _TransactionCardState extends State<TransactionCard> {
                           case 'edit':
                             Navigator.pushNamed(
                               context,
-                              '/edit-transaction',
+                              '/update-transaction',
                               arguments: widget.transaction,
                             );
                             break;

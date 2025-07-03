@@ -122,19 +122,12 @@ class _CategoriesPageState extends State<CategoriesPage>
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () => Navigator.pushNamed(context, "/create-category"),
-            label: const Text(
-              "Create Category",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            icon: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 16),
-        ],
+      // Floating Add Button
+      floatingActionButton: FloatingActionButton.extended(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        onPressed: () => Navigator.pushNamed(context, '/create-category'),
+        icon: const Icon(Icons.add),
+        label: const Text("Create Category"),
       ),
     );
   }

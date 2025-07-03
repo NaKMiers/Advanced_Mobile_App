@@ -52,7 +52,7 @@ class BudgetTab extends StatelessWidget {
                   formatCurrency(currency, total - amount),
                   style: const TextStyle(
                     fontSize: 28,
-                    color: Colors.lightGreenAccent,
+                    color: Colors.lightGreen,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -61,7 +61,7 @@ class BudgetTab extends StatelessWidget {
                   lineHeight: 8,
                   percent: (amount / total).clamp(0.0, 1.0),
                   progressColor: Colors.green,
-                  backgroundColor: Colors.grey[300],
+                  backgroundColor: Colors.grey[400],
                   barRadius: const Radius.circular(16),
                 ),
                 const SizedBox(height: 21),

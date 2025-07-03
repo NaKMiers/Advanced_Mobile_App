@@ -26,7 +26,9 @@ class NoItemsFound extends StatelessWidget {
           padding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       decoration: BoxDecoration(
         border: Border.all(
-          color: borderColor ?? Theme.of(context).primaryColor,
+          color:
+              borderColor ??
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
         ),
         borderRadius: BorderRadius.circular(borderRadius ?? 8),
       ),

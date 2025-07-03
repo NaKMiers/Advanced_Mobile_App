@@ -74,19 +74,12 @@ class _WalletsPageState extends State<WalletsPage> {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () => Navigator.pushNamed(context, '/create-wallet'),
-            label: Text(
-              "Create Wallet",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            icon: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 16),
-        ],
+      // Floating Add Button
+      floatingActionButton: FloatingActionButton.extended(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        onPressed: () => Navigator.pushNamed(context, '/create-wallet'),
+        icon: const Icon(Icons.add),
+        label: const Text("Create Wallet"),
       ),
     );
   }

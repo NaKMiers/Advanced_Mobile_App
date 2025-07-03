@@ -1,4 +1,5 @@
 import 'package:advanced_mobile_app/components/date_range_segments.dart';
+import 'package:advanced_mobile_app/components/no_item_found.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/search_input.dart';
 import 'package:advanced_mobile_app/components/transaction_type_group.dart';
@@ -66,8 +67,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       String query =
           "?from=${toUTC(dateRange.start)}&to=${toUTC(dateRange.end)}";
       if (selectedWallet != null) query += "&wallet=${selectedWallet!.id}";
-
-      print(query);
 
       final res = await getMyTransactionsApi(query);
       List<Transaction> txs = res['transactions'] != null
@@ -275,7 +274,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 ),
 
                 if (groups.isEmpty)
-                  const Center(child: Text("No transactions found")),
+                  const Center(
+                    child: NoItemsFound(text: "No transactions found"),
+                  ),
 
                 const SizedBox(height: 200), // padding bottom
               ],
@@ -286,6 +287,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
       // Floating Add Button
       floatingActionButton: FloatingActionButton.extended(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
         onPressed: () => Navigator.pushNamed(context, '/create-transaction'),
         icon: const Icon(Icons.add),
         label: const Text("Add Transaction"),

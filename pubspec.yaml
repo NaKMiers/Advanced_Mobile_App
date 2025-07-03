@@ -48,6 +48,7 @@ dependencies:
   fl_chart: ^1.0.0
   emoji_picker_flutter: ^4.3.0
   percent_indicator: ^4.2.5
+  url_launcher: ^6.3.1
 
 
 

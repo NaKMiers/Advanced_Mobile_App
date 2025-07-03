@@ -178,7 +178,7 @@ class _BudgetCardState extends State<BudgetCard> {
                       "Left: ${formatCurrency(currency, leftAmount)}",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Colors.black,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
