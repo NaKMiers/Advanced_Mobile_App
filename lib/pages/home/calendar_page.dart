@@ -1,6 +1,8 @@
 import 'package:advanced_mobile_app/components/no_item_found.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/components/transaction.dart';
+import 'package:advanced_mobile_app/constants/settings.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +79,12 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
+    final currencyCode =
+        context.read<SettingsProvider>().settings?.currency ?? "USD";
+    final locale = currencies
+        .where((c) => c.value == currencyCode)
+        .first
+        .locale;
 
     return Scaffold(
       appBar: AppBar(
@@ -108,9 +115,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                   ),
                   Text(
-                    DateFormat.yMMM(
-                      locale.toLanguageTag(),
-                    ).format(currentMonth),
+                    DateFormat.yMMM(locale).format(currentMonth),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -134,7 +139,7 @@ class _CalendarPageState extends State<CalendarPage> {
               Row(
                 children: List.generate(7, (index) {
                   final weekday = DateFormat.E(
-                    locale.toLanguageTag(),
+                    locale,
                   ).format(DateTime(2025, 1, index + 5));
                   return Expanded(
                     child: Center(
@@ -146,6 +151,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   );
                 }),
               ),
+
               const SizedBox(height: 8),
 
               // Calendar grid
@@ -199,7 +205,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           if (dayTxs.isNotEmpty)
                             Text(
                               NumberFormat.compact(
-                                locale: locale.toLanguageTag(),
+                                locale: locale,
                                 explicitSign: true,
                               ).format(total),
                               style: TextStyle(
@@ -215,8 +221,6 @@ class _CalendarPageState extends State<CalendarPage> {
                 },
               ),
 
-              const SizedBox(height: 16),
-
               // MARK: Transactions
               Container(
                 padding: const EdgeInsets.all(16),
@@ -225,7 +229,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   children: [
                     if (transactionsOfDay(selectedDate).isNotEmpty) ...[
                       Text(
-                        "Transactions for ${DateFormat.yMMMd(locale.toLanguageTag()).format(selectedDate)}",
+                        "Transactions for ${DateFormat.yMMMd(locale).format(selectedDate)}",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -247,6 +251,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 180),
             ],
           ),
         ),

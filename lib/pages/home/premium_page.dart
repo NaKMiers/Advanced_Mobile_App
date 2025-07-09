@@ -299,13 +299,15 @@ class _PremiumPageState extends State<PremiumPage> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 4,
-                      color: Colors.black,
-                      offset: const Offset(0, -2),
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      width: 2,
                     ),
-                  ],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

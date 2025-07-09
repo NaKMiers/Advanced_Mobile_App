@@ -13,7 +13,7 @@ String toUTC(dynamic time) {
 }
 
 // Format date as DD/MM/YYYY or localized format
-String formatDate(DateTime date, {String? locale}) {
+String formatDate(DateTime date, {String? locale, required String dateFormat}) {
   if (locale != null) {
     return DateFormat.yMMMMd(locale).format(date);
   }

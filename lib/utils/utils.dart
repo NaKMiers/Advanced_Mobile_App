@@ -18,7 +18,7 @@ enum AdmobType { appOpen, banner, interstitial, native }
 
 final Map<AdmobType, Map<String, String>> admobIds = {
   AdmobType.appOpen: {
-    'dev': '', // hoặc test ID của admob
+    'dev': '',
     'ios': dotenv.env['ADMOB_IOS_APPOPEN_ID']!,
     'android': dotenv.env['ADMOB_ANDROID_APPOPEN_ID']!,
   },

@@ -6,21 +6,18 @@ import 'package:advanced_mobile_app/utils/string.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CategoryWidget extends StatefulWidget {
+class CategoryItem extends StatefulWidget {
   final Category category;
   final bool hideMenu;
 
-  const CategoryWidget({
-    Key? key,
-    required this.category,
-    this.hideMenu = false,
-  }) : super(key: key);
+  const CategoryItem({Key? key, required this.category, this.hideMenu = false})
+    : super(key: key);
 
   @override
-  State<CategoryWidget> createState() => _CategoryWidgetState();
+  State<CategoryItem> createState() => _CategoryItemState();
 }
 
-class _CategoryWidgetState extends State<CategoryWidget> {
+class _CategoryItemState extends State<CategoryItem> {
   bool deleting = false;
 
   void handleDelete(BuildContext context) async {

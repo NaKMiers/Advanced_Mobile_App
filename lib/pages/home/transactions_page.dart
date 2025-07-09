@@ -75,8 +75,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 .toList()
           : [];
 
-      print("awdddw" + res['transactions'].length.toString());
-
       setState(() {
         transactions = txs;
       });

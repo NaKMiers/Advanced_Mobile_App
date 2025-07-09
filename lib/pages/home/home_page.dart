@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
             Wallets(wallets: wallets),
             const SizedBox(height: 21),
             History(),
-            const SizedBox(height: 21 / 2),
+            const SizedBox(height: 21),
             LatestTransactions(),
             const SizedBox(height: 200),
           ],

@@ -57,7 +57,7 @@ class DateRangeSegments extends StatelessWidget {
               style: IconButton.styleFrom(
                 backgroundColor: Theme.of(
                   context,
-                ).primaryColor.withOpacity(0.1),
+                ).colorScheme.primary.withAlpha(50),
                 shape: const CircleBorder(),
               ),
             ),
@@ -69,7 +69,9 @@ class DateRangeSegments extends StatelessWidget {
               onPressed: disabledPrev ? null : prev,
               icon: const Icon(Icons.chevron_left, color: Colors.white),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black87,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withAlpha(80),
                 shape: const CircleBorder(),
               ),
             ),
@@ -103,7 +105,9 @@ class DateRangeSegments extends StatelessWidget {
               onPressed: disabledNext ? null : next,
               icon: const Icon(Icons.chevron_right, color: Colors.white),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black87,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withAlpha(80),
                 shape: const CircleBorder(),
               ),
             ),
@@ -130,6 +134,7 @@ class SegmentedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      spacing: 8,
       children: segments
           .asMap()
           .entries

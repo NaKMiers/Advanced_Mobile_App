@@ -49,9 +49,14 @@ class TransactionCategoryGroup extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        category.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      SizedBox(
+                        width: 200,
+                        child: Text(
+                          category.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                       Text(
                         formatCurrency(currency, totalAmount),
@@ -71,7 +76,7 @@ class TransactionCategoryGroup extends StatelessWidget {
                     arguments: {'category': category},
                   );
                 },
-                child: const Text("Add Transaction"),
+                child: const Text("Add"),
               ),
             ],
           ),

@@ -81,7 +81,7 @@ class CategoryGroup extends StatelessWidget {
             child: categories.isNotEmpty
                 ? Column(
                     children: categories
-                        .map((category) => CategoryWidget(category: category))
+                        .map((category) => CategoryItem(category: category))
                         .toList(),
                   )
                 : const NoItemsFound(text: 'No categories found!'),
