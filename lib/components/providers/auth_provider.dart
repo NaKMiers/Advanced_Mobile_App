@@ -64,7 +64,7 @@ class AuthProvider extends ChangeNotifier {
 
   // Update premium status based on user plan
   void _updatePremiumStatus() {
-    if (_user == null || _user!.plan == null) {
+    if (_user == null) {
       _isPremium = false;
       return;
     }

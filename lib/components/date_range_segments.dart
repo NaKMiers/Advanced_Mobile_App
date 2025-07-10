@@ -134,7 +134,7 @@ class SegmentedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 8,
+      spacing: 4,
       children: segments
           .asMap()
           .entries

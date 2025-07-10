@@ -3,6 +3,9 @@ import 'package:advanced_mobile_app/components/category.dart';
 import 'package:advanced_mobile_app/components/transaction.dart';
 import 'package:advanced_mobile_app/components/wallet_card.dart';
 import 'package:advanced_mobile_app/models/budget_model.dart';
+import 'package:advanced_mobile_app/models/category_model.dart';
+import 'package:advanced_mobile_app/models/transaction_model.dart';
+import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -22,30 +25,33 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final toolInvocation = parts != null && parts.length > 1
-        ? parts[1]['toolInvocation']
-        : null;
-    final result = toolInvocation?['result'];
-    final toolName = toolInvocation?['toolName'];
-    final message = result?['message'] ?? '';
-    final errorCode = result?['errorCode'];
+    final result = parts?['result'];
+    final toolName = parts?['toolName'];
+    final message = parts?['message'] ?? '';
+    final errorCode = parts?['errorCode'];
+
+    print("result: $result");
+    print("toolName: $toolName");
+    print("message: $message");
+    print("errorCode: $errorCode");
 
     Widget messageWidget(String text) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        margin: EdgeInsets.only(
-          top: 8,
-          bottom: 12,
-          left: role == 'assistant' ? 0 : 48,
-          right: role == 'user' ? 0 : 48,
+      final theme = Theme.of(context).colorScheme;
+
+      return Align(
+        alignment: role == 'assistant'
+            ? Alignment.centerLeft
+            : Alignment.centerRight,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: double.infinity),
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.only(top: 8),
+          decoration: BoxDecoration(
+            color: theme.secondary,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: MarkdownBody(data: text),
         ),
-        decoration: BoxDecoration(
-          color: role == 'assistant'
-              ? Colors.grey.shade100
-              : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: MarkdownBody(data: text),
       );
     }
 
@@ -70,22 +76,44 @@ class MessageItem extends StatelessWidget {
     // 🧠 Render tool result
     switch (toolName) {
       case 'get_all_wallets':
-        final wallets = result['wallets'] ?? [];
+        List<Wallet> wallets = result['wallets'] != null
+            ? (result['wallets'] as List)
+                  .map((json) => Wallet.fromJson(json))
+                  .toList()
+            : [];
         if (wallets.isEmpty) return messageWidget('No wallets found');
         return Column(
+          spacing: 8,
           crossAxisAlignment: role == 'assistant'
               ? CrossAxisAlignment.start
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
-            ...wallets.map<Widget>((w) => WalletCard(wallet: w)).toList(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: wallets
+                    .map(
+                      (wallet) => Container(
+                        width: MediaQuery.of(context).size.width - 24,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: WalletCard(wallet: wallet),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
           ],
         );
-
       case 'get_wallet':
       case 'create_wallet':
       case 'update_wallet':
-        final wallet = result['wallet'];
+        Wallet? wallet = result['wallet'] != null
+            ? Wallet.fromJson(result['wallet'])
+            : null;
+
         if (wallet == null) return messageWidget('No wallet found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -96,15 +124,19 @@ class MessageItem extends StatelessWidget {
             WalletCard(wallet: wallet),
           ],
         );
-
       case 'delete_wallet':
-        final wallet = result['wallet'];
-        return messageWidget(
-          'Wallet "${wallet?['name']}" deleted successfully!',
-        );
+        Wallet? wallet = result['wallet'] != null
+            ? Wallet.fromJson(result['wallet'])
+            : null;
+
+        return messageWidget('Wallet "${wallet?.name}" deleted successfully!');
 
       case 'get_all_categories':
-        final categories = result['categories'] ?? [];
+        List<Category> categories = result['categories'] != null
+            ? (result['categories'] as List)
+                  .map((json) => Category.fromJson(json))
+                  .toList()
+            : [];
         if (categories.isEmpty) return messageWidget('No categories found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -117,11 +149,12 @@ class MessageItem extends StatelessWidget {
                 .toList(),
           ],
         );
-
       case 'get_category':
       case 'create_category':
       case 'update_category':
-        final category = result['category'];
+        Category? category = result['category'] != null
+            ? Category.fromJson(result['category'])
+            : null;
         if (category == null) return messageWidget('No category found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -132,15 +165,20 @@ class MessageItem extends StatelessWidget {
             CategoryItem(category: category),
           ],
         );
-
       case 'delete_category':
-        final category = result['category'];
+        Category? category = result['category'] != null
+            ? Category.fromJson(result['category'])
+            : null;
         return messageWidget(
-          'Category "${category?['name']}" deleted successfully!',
+          'Category "${category?.name}" deleted successfully!',
         );
 
       case 'get_all_budgets':
-        List<Budget> budgets = result['budgets'] ?? [];
+        List<Budget> budgets = result['budgets'] != null
+            ? (result['budgets'] as List)
+                  .map((json) => Budget.fromJson(json))
+                  .toList()
+            : [];
         if (budgets.isEmpty) return messageWidget('No budgets found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -155,7 +193,6 @@ class MessageItem extends StatelessWidget {
                 .toList(),
           ],
         );
-
       case 'create_budget':
       case 'update_budget':
         Budget? budget = result['budget'];
@@ -169,15 +206,20 @@ class MessageItem extends StatelessWidget {
             BudgetCard(budget: budget, begin: budget.begin, end: budget.end),
           ],
         );
-
       case 'delete_budget':
-        final budget = result['budget'];
+        Budget? budget = result['budget'] != null
+            ? Budget.fromJson(result['budget'])
+            : null;
         return messageWidget(
-          'Budget for category ${budget?['category']?['name']} with total ${budget?['total']} deleted successfully!',
+          'Budget for category ${budget?.category.name} with total ${budget?.total} deleted successfully!',
         );
 
       case 'get_all_transactions':
-        final transactions = result['transactions'] ?? [];
+        List<Transaction> transactions = result['transactions'] != null
+            ? (result['transactions'] as List)
+                  .map((json) => Transaction.fromJson(json))
+                  .toList()
+            : [];
         if (transactions.isEmpty) return messageWidget('No transactions found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -190,12 +232,13 @@ class MessageItem extends StatelessWidget {
                 .toList(),
           ],
         );
-
       case 'get_transaction':
       case 'get_most_transaction':
       case 'create_transaction':
       case 'update_transaction':
-        final transaction = result['transaction'];
+        Transaction? transaction = result['transaction'] != null
+            ? Transaction.fromJson(result['transaction'])
+            : null;
         if (transaction == null) return messageWidget('No transaction found');
         return Column(
           crossAxisAlignment: role == 'assistant'
@@ -206,7 +249,6 @@ class MessageItem extends StatelessWidget {
             TransactionCard(transaction: transaction),
           ],
         );
-
       case 'delete_transaction':
         final transaction = result['transaction'];
         return messageWidget(
