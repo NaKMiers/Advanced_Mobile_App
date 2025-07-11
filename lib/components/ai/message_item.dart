@@ -99,7 +99,7 @@ class MessageItem extends StatelessWidget {
                       (wallet) => Container(
                         width: MediaQuery.of(context).size.width - 24,
                         margin: const EdgeInsets.only(right: 12),
-                        child: WalletCard(wallet: wallet),
+                        child: WalletCard(wallet: wallet, hideMenu: true),
                       ),
                     )
                     .toList(),
@@ -121,7 +121,7 @@ class MessageItem extends StatelessWidget {
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
-            WalletCard(wallet: wallet),
+            WalletCard(wallet: wallet, hideMenu: true),
           ],
         );
       case 'delete_wallet':
@@ -145,7 +145,7 @@ class MessageItem extends StatelessWidget {
           children: [
             if (message.isNotEmpty) messageWidget(message),
             ...categories
-                .map<Widget>((c) => CategoryItem(category: c))
+                .map<Widget>((c) => CategoryItem(category: c, hideMenu: true))
                 .toList(),
           ],
         );
@@ -162,7 +162,7 @@ class MessageItem extends StatelessWidget {
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
-            CategoryItem(category: category),
+            CategoryItem(category: category, hideMenu: true),
           ],
         );
       case 'delete_category':
@@ -181,6 +181,7 @@ class MessageItem extends StatelessWidget {
             : [];
         if (budgets.isEmpty) return messageWidget('No budgets found');
         return Column(
+          spacing: 6,
           crossAxisAlignment: role == 'assistant'
               ? CrossAxisAlignment.start
               : CrossAxisAlignment.end,
@@ -188,7 +189,12 @@ class MessageItem extends StatelessWidget {
             if (message.isNotEmpty) messageWidget(message),
             ...budgets
                 .map<Widget>(
-                  (b) => BudgetCard(budget: b, begin: b.begin, end: b.end),
+                  (b) => BudgetCard(
+                    budget: b,
+                    begin: b.begin,
+                    end: b.end,
+                    hideMenu: true,
+                  ),
                 )
                 .toList(),
           ],
@@ -203,7 +209,12 @@ class MessageItem extends StatelessWidget {
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
-            BudgetCard(budget: budget, begin: budget.begin, end: budget.end),
+            BudgetCard(
+              budget: budget,
+              begin: budget.begin,
+              end: budget.end,
+              hideMenu: true,
+            ),
           ],
         );
       case 'delete_budget':
@@ -222,13 +233,16 @@ class MessageItem extends StatelessWidget {
             : [];
         if (transactions.isEmpty) return messageWidget('No transactions found');
         return Column(
+          spacing: 6,
           crossAxisAlignment: role == 'assistant'
               ? CrossAxisAlignment.start
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
             ...transactions
-                .map<Widget>((t) => TransactionCard(transaction: t))
+                .map<Widget>(
+                  (t) => TransactionCard(transaction: t, hideMenu: true),
+                )
                 .toList(),
           ],
         );
@@ -246,7 +260,7 @@ class MessageItem extends StatelessWidget {
               : CrossAxisAlignment.end,
           children: [
             if (message.isNotEmpty) messageWidget(message),
-            TransactionCard(transaction: transaction),
+            TransactionCard(transaction: transaction, hideMenu: true),
           ],
         );
       case 'delete_transaction':

@@ -110,97 +110,98 @@ class _WalletCardState extends State<WalletCard> {
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    // Exclude
-                    Switch(value: exclude, onChanged: toggleExclude),
-                    Container(
-                      height: 24,
-                      width: 24,
-                      margin: const EdgeInsets.only(left: 8),
-                      child: deleting
-                          ? CircularProgressIndicator(strokeWidth: 2)
-                          : PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert),
-                              padding: EdgeInsets.zero,
-                              onSelected: (value) {
-                                switch (value) {
-                                  case 'delete':
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
+                if (!widget.hideMenu)
+                  Row(
+                    children: [
+                      // Exclude
+                      Switch(value: exclude, onChanged: toggleExclude),
+                      Container(
+                        height: 24,
+                        width: 24,
+                        margin: const EdgeInsets.only(left: 8),
+                        child: deleting
+                            ? CircularProgressIndicator(strokeWidth: 2)
+                            : PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert),
+                                padding: EdgeInsets.zero,
+                                onSelected: (value) {
+                                  switch (value) {
+                                    case 'delete':
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            side: const BorderSide(width: 1.5),
                                           ),
-                                          side: const BorderSide(width: 1.5),
-                                        ),
-                                        backgroundColor: Theme.of(
-                                          context,
-                                        ).colorScheme.secondary,
-                                        title: Text(
-                                          "Delete wallet",
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        content: Text(
-                                          "Are you sure you want to delete this wallet?",
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondary,
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: const Text("Cancel"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              deleteWallet(context);
-                                            },
-                                            child: const Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                          title: Text(
+                                            "Delete wallet",
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSecondary,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                    break;
-                                  case 'edit':
-                                    // handle edit
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/update-wallet',
-                                      arguments: wallet,
-                                    );
-                                    break;
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text("Edit"),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text("Delete"),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ],
-                ),
+                                          content: Text(
+                                            "Are you sure you want to delete this wallet?",
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSecondary,
+                                            ),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text("Cancel"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                deleteWallet(context);
+                                              },
+                                              child: const Text(
+                                                "Delete",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      break;
+                                    case 'edit':
+                                      // handle edit
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/update-wallet',
+                                        arguments: wallet,
+                                      );
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text("Edit"),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text("Delete"),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

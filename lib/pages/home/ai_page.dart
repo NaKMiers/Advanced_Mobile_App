@@ -2,40 +2,16 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:advanced_mobile_app/components/ai/message_item.dart';
+import 'package:advanced_mobile_app/components/providers/init_provider.dart';
+import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
+import 'package:advanced_mobile_app/constants/index.dart';
+import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:advanced_mobile_app/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-// 15 sample messages
-List<Map<String, dynamic>> sampleMessages = [
-  {'role': 'user', 'content': 'What is the weather like today?'},
-  {'role': 'assistant', 'content': 'The weather is sunny with a high of 25°C.'},
-  {'role': 'user', 'content': 'Can you help me with my budget?'},
-  {'role': 'assistant', 'content': 'Sure! What are your income and expenses?'},
-  {'role': 'user', 'content': 'I earn \$3000 a month and spend \$2500.'},
-  {'role': 'assistant', 'content': 'You have a surplus of \$500 this month.'},
-  {'role': 'user', 'content': 'How can I save more?'},
-  // {
-  //   'role': 'assistant',
-  //   'content': 'Consider reducing dining out and entertainment expenses.',
-  // },
-  // {'role': 'user', 'content': 'What are some good investment options?'},
-  // {
-  //   'role': 'assistant',
-  //   'content': 'You can consider stocks, bonds, or mutual funds.',
-  // },
-  // {'role': 'user', 'content': 'Can you track my expenses?'},
-  // {
-  //   'role': 'assistant',
-  //   'content': 'Yes, I can help you categorize and analyze your spending.',
-  // },
-  // {'role': 'user', 'content': 'What is my net worth?'},
-  // {
-  //   'role': 'assistant',
-  //   'content':
-  //       'Your net worth is the difference between your assets and liabilities.',
-  // },
-];
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AIPage extends StatefulWidget {
   const AIPage({super.key});
@@ -45,13 +21,35 @@ class AIPage extends StatefulWidget {
 }
 
 class _AIPageState extends State<AIPage> {
-  final _controller = TextEditingController();
+  final controller = TextEditingController();
+  bool hasText = false;
   final List<Map<String, dynamic>> messages = [];
   bool loading = false;
+  late stt.SpeechToText speech;
+  bool isListening = false;
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    speech = stt.SpeechToText();
+
+    scrollToBottom();
+
+    controller.addListener(() {
+      print('Controller text: ${controller.text}');
+      setState(() {
+        hasText = controller.text.isNotEmpty;
+      });
+    });
+  }
 
   // MARK: Send Message
-  Future<void> sendMessage(String content) async {
+  void sendMessage(String content) async {
     if (content.trim().isEmpty) return;
+
+    // dismiss keyboard
+    FocusScope.of(context).unfocus();
 
     final token = await getToken();
     if (token == null) throw Exception('No token found');
@@ -60,6 +58,7 @@ class _AIPageState extends State<AIPage> {
       messages.add({'role': 'user', 'content': content});
       loading = true;
     });
+    controller.clear();
 
     try {
       final request = http.Request(
@@ -75,6 +74,8 @@ class _AIPageState extends State<AIPage> {
         'Authorization': 'Bearer $token',
       });
 
+      print('messages: $messages');
+
       request.body = jsonEncode({'messages': messages});
 
       final streamedResponse = await request.send();
@@ -85,7 +86,6 @@ class _AIPageState extends State<AIPage> {
       await for (final chunk in streamedResponse.stream.transform(
         utf8.decoder,
       )) {
-        print('Received chunk: $chunk');
         final split = chunk.split(":");
         final data = split.sublist(1).join(":").trim();
 
@@ -112,8 +112,6 @@ class _AIPageState extends State<AIPage> {
           final jsonData = jsonDecode(split.sublist(1).join(":").trim());
           toolData?['result'] = jsonData['result'];
 
-          print('Tool result: ${toolData}');
-
           setState(() {
             messages.add({
               'role': 'assistant',
@@ -128,14 +126,167 @@ class _AIPageState extends State<AIPage> {
         () => messages.add({'role': 'assistant', 'content': '⚠️ Error: $e'}),
       );
     } finally {
-      _controller.clear();
       setState(() => loading = false);
+      scrollToBottom();
     }
+  }
+
+  // MARK: Clear Chat
+  void clearChat() {
+    setState(() {
+      messages.clear();
+    });
+  }
+
+  // MARK: Changer Personality
+  void changePersonality(int id) async {
+    final selected = personalities.firstWhere(
+      (p) => p['id'] == id,
+      orElse: () => {'id': 0, 'title': 'Default'},
+    );
+
+    try {
+      await updateMySettingsApi({
+        "personalities": [selected['id']],
+      });
+
+      context.read<InitProvider>().refreshSettings();
+    } catch (e) {
+      print("Error changing personality: $e");
+    }
+  }
+
+  // MARK: Show Personality Picker
+  void showPersonalityPicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: personalities
+              .map(
+                (p) => ListTile(
+                  leading: Text(
+                    p['title'],
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    changePersonality(p['id']);
+                    Navigator.pop(context);
+                  },
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+
+  //MARK: Request Microphone Permission
+  Future<bool> requestMicrophonePermission(BuildContext context) async {
+    var status = await Permission.microphone.status;
+
+    if (status.isGranted) return true;
+
+    if (status.isDenied) {
+      final result = await Permission.microphone.request();
+      if (result.isGranted) return true;
+    }
+
+    if (status.isPermanentlyDenied) {
+      final openSettings = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Microphone permission required"),
+          content: const Text(
+            "You have denied microphone access. Please enable it in settings to use voice input.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                openAppSettings();
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Open Settings"),
+            ),
+          ],
+        ),
+      );
+
+      return openSettings == true ? false : false;
+    }
+
+    return false;
+  }
+
+  // MARK: Start Listening
+  void startListening() async {
+    bool granted = await requestMicrophonePermission(context);
+    if (!granted) return;
+
+    bool available = await speech.initialize(
+      onStatus: (val) => print('Speech status: $val'),
+      onError: (val) => print('Speech error: $val'),
+    );
+
+    print('Speech available: $available');
+
+    if (available) {
+      setState(() => isListening = true);
+      speech.listen(
+        onResult: (val) {
+          print('Speech result: ${val.recognizedWords}');
+          setState(() {
+            controller.text = val.recognizedWords;
+          });
+        },
+      );
+    } else {
+      setState(() => isListening = false);
+      speech.stop();
+    }
+  }
+
+  // MARK: Stop Listening
+  void stopListening() {
+    speech.stop();
+    setState(() => isListening = false);
+  }
+
+  // MARK:
+  void scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
+    final personalityId = context
+        .watch<SettingsProvider>()
+        .settings
+        ?.personalities[0];
+    final personality = personalities.firstWhere(
+      (p) => p['id'] == personalityId,
+    );
 
     return Scaffold(
       body: Column(
@@ -181,8 +332,10 @@ class _AIPageState extends State<AIPage> {
               ),
             ),
 
+          // MARK: Messages
           Expanded(
             child: ListView.builder(
+              controller: scrollController,
               padding: const EdgeInsets.all(12),
               itemCount: messages.length,
               itemBuilder: (context, index) {
@@ -201,25 +354,79 @@ class _AIPageState extends State<AIPage> {
               padding: EdgeInsets.symmetric(vertical: 8),
               child: CircularProgressIndicator(),
             ),
+
           Padding(
             padding: const EdgeInsets.all(8),
-            child: Row(
+            child: Column(
+              spacing: 4,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    onSubmitted: sendMessage,
-                    decoration: InputDecoration(
-                      hintText: 'Ask something...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                Row(
+                  children: [
+                    if (hasText)
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          controller.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                      ),
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        onSubmitted: sendMessage,
+                        decoration: InputDecoration(
+                          hintText: 'Ask something...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: () => sendMessage(controller.text),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () => sendMessage(_controller.text),
+                Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // MARK: Clear Chat
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: theme.secondary,
+                      ),
+                      onPressed: clearChat,
+                      child: Text(
+                        "Clear chat",
+                        style: TextStyle(color: theme.onSecondary),
+                      ),
+                    ),
+
+                    // MARK: Change Personality
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: theme.secondary,
+                        ),
+                        onPressed: showPersonalityPicker,
+                        child: Text(
+                          personality['title'] ?? "Change personality",
+                          style: TextStyle(color: theme.onSecondary),
+                        ),
+                      ),
+                    ),
+
+                    // MARK: Voice
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.secondary,
+                      ),
+                      onPressed: isListening ? stopListening : startListening,
+                      icon: Icon(isListening ? Icons.square : Icons.mic),
+                    ),
+                  ],
                 ),
               ],
             ),

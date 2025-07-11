@@ -8,8 +8,13 @@ import 'package:provider/provider.dart';
 
 class TransactionCard extends StatefulWidget {
   final Transaction transaction;
+  final bool hideMenu;
 
-  const TransactionCard({super.key, required this.transaction});
+  const TransactionCard({
+    super.key,
+    required this.transaction,
+    this.hideMenu = false,
+  });
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
@@ -147,67 +152,71 @@ class _TransactionCardState extends State<TransactionCard> {
               ],
             ),
 
-            // Menu Button
-            Container(
-              height: 24,
-              width: 24,
-              margin: const EdgeInsets.only(left: 8),
-              child: deleting || duplicating
-                  ? CircularProgressIndicator(strokeWidth: 2)
-                  : PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      padding: EdgeInsets.zero,
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'duplicate':
-                            duplicateTransaction();
-                            break;
-                          case 'delete':
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Delete Transaction"),
-                                content: const Text(
-                                  "Are you sure you want to delete this transaction?",
+            if (!widget.hideMenu)
+              // Menu Button
+              Container(
+                height: 24,
+                width: 24,
+                margin: const EdgeInsets.only(left: 8),
+                child: deleting || duplicating
+                    ? CircularProgressIndicator(strokeWidth: 2)
+                    : PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        padding: EdgeInsets.zero,
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'duplicate':
+                              duplicateTransaction();
+                              break;
+                            case 'delete':
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text("Delete Transaction"),
+                                  content: const Text(
+                                    "Are you sure you want to delete this transaction?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        deleteTransaction(context);
+                                      },
+                                      child: const Text("Delete"),
+                                    ),
+                                  ],
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      deleteTransaction(context);
-                                    },
-                                    child: const Text("Delete"),
-                                  ),
-                                ],
-                              ),
-                            );
-                            break;
-                          case 'edit':
-                            Navigator.pushNamed(
-                              context,
-                              '/update-transaction',
-                              arguments: widget.transaction,
-                            );
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'duplicate',
-                          child: Text("Duplicate"),
-                        ),
-                        const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text("Delete"),
-                        ),
-                      ],
-                    ),
-            ),
+                              );
+                              break;
+                            case 'edit':
+                              Navigator.pushNamed(
+                                context,
+                                '/update-transaction',
+                                arguments: widget.transaction,
+                              );
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'duplicate',
+                            child: Text("Duplicate"),
+                          ),
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text("Edit"),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text("Delete"),
+                          ),
+                        ],
+                      ),
+              ),
           ],
         ),
       ],

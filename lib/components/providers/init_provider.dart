@@ -102,7 +102,11 @@ class InitProvider extends ChangeNotifier {
 
     try {
       // Mock getMySettingsApi
-      final settings = await getMySettingsApi();
+      final result = await getMySettingsApi();
+      app_models.Settings? settings = result['settings'] != null
+          ? app_models.Settings.fromJson(result['settings'])
+          : null;
+
       settingsProvider.setSettings(settings);
     } catch (e) {
       print('Settings error: $e');
