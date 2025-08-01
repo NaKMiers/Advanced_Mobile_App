@@ -34,8 +34,8 @@ class Wallet {
   factory Wallet.fromJson(Map<String, dynamic> json) {
     return Wallet(
       id: json['_id'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
 
       user: json['user'],
       name: json['name'],

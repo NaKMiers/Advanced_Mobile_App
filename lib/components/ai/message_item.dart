@@ -30,11 +30,6 @@ class MessageItem extends StatelessWidget {
     final message = parts?['message'] ?? '';
     final errorCode = parts?['errorCode'];
 
-    print("result: $result");
-    print("toolName: $toolName");
-    print("message: $message");
-    print("errorCode: $errorCode");
-
     Widget messageWidget(String text) {
       final theme = Theme.of(context).colorScheme;
 

@@ -30,16 +30,16 @@ class Budget {
   factory Budget.fromJson(Map<String, dynamic> json) {
     return Budget(
       id: json['_id'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
 
       user: json['user'],
       category: Category.fromJson(json['category']),
 
       total: (json['total'] ?? 0).toDouble(),
       amount: (json['amount'] ?? 0).toDouble(),
-      begin: DateTime.parse(json['begin'] ?? ''),
-      end: DateTime.parse(json['end'] ?? ''),
+      begin: DateTime.parse(json['begin'] ?? '').toLocal(),
+      end: DateTime.parse(json['end'] ?? '').toLocal(),
     );
   }
 }

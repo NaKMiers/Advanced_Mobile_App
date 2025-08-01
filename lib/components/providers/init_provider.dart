@@ -33,8 +33,6 @@ class InitProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    print('🔄 InitProvider: starting _init');
-
     final user = context.read<AuthProvider>().user;
     if (user == null) return;
 

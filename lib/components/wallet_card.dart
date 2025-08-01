@@ -1,4 +1,5 @@
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
 import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
@@ -44,8 +45,6 @@ class _WalletCardState extends State<WalletCard> {
         context,
         listen: false,
       ).updateWallet(updatedWallet);
-
-      print("Wallet updated: ${res['wallet']}");
     } catch (err) {
       print(err);
     }
@@ -246,7 +245,8 @@ class _WalletCardState extends State<WalletCard> {
   Widget _buildItem(String title, double value, String type) {
     final iconData = checkTranType(type)['icon'];
     final color = checkTranType(type)['color'];
-    final currency = 'USD';
+    final currency =
+        context.watch<SettingsProvider>().settings?.currency ?? 'USD';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),

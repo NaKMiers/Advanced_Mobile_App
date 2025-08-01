@@ -40,7 +40,7 @@ class WelcomePage extends StatelessWidget {
                                   letterSpacing: 1.5,
                                 ),
                             children: [
-                              const TextSpan(text: 'DEEWAS'),
+                              const TextSpan(text: 'AMA'),
                               TextSpan(
                                 text: '.',
                                 style: TextStyle(
@@ -86,7 +86,7 @@ class WelcomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Powered by AI, Deewas helps you track, save, and stay in control.",
+                          "Powered by AI, AMA helps you track, save, and stay in control.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
@@ -114,7 +114,7 @@ class WelcomePage extends StatelessWidget {
                                   Navigator.pushNamed(context, '/onboarding');
                                 },
                                 child: Text(
-                                  "Try Deewas for Free",
+                                  "Try AMA for Free",
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
@@ -157,7 +157,7 @@ class WelcomePage extends StatelessWidget {
                         const SizedBox(height: 24),
                         // Terms and Privacy
                         Text(
-                          "By trying Deewas, you agree to the Deewas",
+                          "By trying AMA, you agree to the AMA",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
@@ -199,7 +199,7 @@ class WelcomePage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'of Deewas',
+                              'of AMA',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),

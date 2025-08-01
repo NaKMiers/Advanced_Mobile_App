@@ -64,8 +64,6 @@ class _HistoryState extends State<History> {
 
       setState(() => transactions = txs);
 
-      print('getHistory: ${transactions.length} transactions');
-
       loadChartData();
     } catch (err) {
       debugPrint('getHistory error: $err');

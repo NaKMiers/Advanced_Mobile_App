@@ -1,5 +1,6 @@
 import 'package:advanced_mobile_app/components/providers/category_provider.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:advanced_mobile_app/models/budget_model.dart';
 import 'package:advanced_mobile_app/models/category_model.dart';
 import 'package:advanced_mobile_app/requests/budget_requests.dart';
@@ -136,144 +137,146 @@ class _UpdateBudgetPageState extends State<UpdateBudgetPage> {
           style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // MARK: Total
-              const Text(
-                "Total",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: totalController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: "...",
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 0,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+      body: Wrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // MARK: Total
+                const Text(
+                  "Total",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Amount is required";
-                  }
-                  final num = double.tryParse(value);
-                  if (num == null || num <= 0) {
-                    return "Amount must be greater than 0";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 21),
-
-              // MARK: Category
-              const Text(
-                "Category",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: showCategoryPicker,
-                child: Container(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: theme.colorScheme.primary,
-                      width: 1,
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: totalController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: "...",
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  alignment: Alignment.centerLeft,
-                  child: selectedCategory != null
-                      ? Text(
-                          "${selectedCategory!.icon}   ${selectedCategory!.name}",
-                        )
-                      : const Text("Select category"),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Amount is required";
+                    }
+                    final num = double.tryParse(value);
+                    if (num == null || num <= 0) {
+                      return "Amount must be greater than 0";
+                    }
+                    return null;
+                  },
                 ),
-              ),
 
-              const SizedBox(height: 21),
+                const SizedBox(height: 21),
 
-              // MARK: Date Range
-              const Text(
-                "Date Range",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDateRangePicker(
-                    context: context,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2100),
-                    initialDateRange: dateRange,
-                  );
-                  if (picked != null) {
-                    setState(() => dateRange = picked);
-                  }
-                },
-                child: Container(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: theme.colorScheme.primary,
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  child: dateRange != null
-                      ? Text(
-                          "${DateFormat.yMd().format(dateRange!.start)} - ${DateFormat.yMd().format(dateRange!.end)}",
-                        )
-                      : const Text("Select date range"),
+                // MARK: Category
+                const Text(
+                  "Category",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // MARK: Save + Cancel
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: showCategoryPicker,
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.primary,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onPressed: saving ? null : _handleSave,
-                    child: saving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    alignment: Alignment.centerLeft,
+                    child: selectedCategory != null
+                        ? Text(
+                            "${selectedCategory!.icon}   ${selectedCategory!.name}",
                           )
-                        : Text(
-                            'Save',
-                            style: TextStyle(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
+                        : const Text("Select category"),
                   ),
-                ],
-              ),
-            ],
+                ),
+
+                const SizedBox(height: 21),
+
+                // MARK: Date Range
+                const Text(
+                  "Date Range",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final picked = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                      initialDateRange: dateRange,
+                    );
+                    if (picked != null) {
+                      setState(() => dateRange = picked);
+                    }
+                  },
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.primary,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    child: dateRange != null
+                        ? Text(
+                            "${DateFormat.yMd().format(dateRange!.start)} - ${DateFormat.yMd().format(dateRange!.end)}",
+                          )
+                        : const Text("Select date range"),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // MARK: Save + Cancel
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                      onPressed: saving ? null : _handleSave,
+                      child: saving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              'Save',
+                              style: TextStyle(
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

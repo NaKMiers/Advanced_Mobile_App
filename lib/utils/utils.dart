@@ -1,12 +1,10 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final String baseUrl = (kDebugMode && !kIsWeb)
-    ? 'http://192.168.2.11:3000'
-    : dotenv.env['WEB_SERVER_URL']!;
+final String baseUrl = 'http://192.168.2.11:3000';
 
 Future<String?> getToken() async {
   final prefs = await SharedPreferences.getInstance();

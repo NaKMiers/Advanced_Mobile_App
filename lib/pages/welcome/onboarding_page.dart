@@ -85,12 +85,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           final prefs = await SharedPreferences.getInstance();
 
           // Get currency and personality from SharedPreferences
-          final currency = prefs.getString('currency');
-          final personality = prefs.getString('personality');
-
-          print(currency);
-          print(personality);
-          print(form);
+          prefs.getString('currency');
+          prefs.getString('personality');
 
           try {
             await sendReportApi(form);
@@ -108,7 +104,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isLarge = screenWidth > 768;
 
     return Scaffold(
       body: PageWrapper(
@@ -138,10 +133,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ),
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      height: 4,
+                      height: 8,
                       width: screenWidth * (curSlide + 1) / slides.length,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Colors.green,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),

@@ -43,6 +43,7 @@ Future<Map<String, dynamic>> signInGoogleApi(
   String idToken,
   String googleUserId,
   String locale,
+  dynamic googleUserData,
 ) async {
   final res = await http.post(
     Uri.parse('$api/sign-in/google'),
@@ -50,6 +51,7 @@ Future<Map<String, dynamic>> signInGoogleApi(
       'idToken': idToken,
       'googleUserId': googleUserId,
       'locale': locale,
+      'googleUserData': googleUserData,
     }),
     headers: {'Content-Type': 'application/json'},
   );

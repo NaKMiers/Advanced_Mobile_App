@@ -4,12 +4,13 @@ import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/search_input.dart';
 import 'package:advanced_mobile_app/components/transaction_type_group.dart';
 import 'package:advanced_mobile_app/components/wallet_picker.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:advanced_mobile_app/models/category_group.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/models/wallet_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
-import 'package:advanced_mobile_app/utils/time.dart';
 import 'package:flutter/material.dart';
+import 'package:moment_dart/moment_dart.dart';
 import 'package:provider/provider.dart';
 
 class TransactionsPage extends StatefulWidget {
@@ -25,31 +26,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   bool isIncludeTransfer = false;
   String search = "";
-  String timeSegment = 'month'; // 'week', 'month', 'year'
-
-  DateTimeRange dateRange = DateTimeRange(
-    start: DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      1,
-    ), // start of month
-    end: DateTime(
-      DateTime.now().year,
-      DateTime.now().month + 1,
-      0,
-      23,
-      59,
-      59,
-    ), // end of month
-  );
-
-  DateTime? oldestDate;
-  Wallet? selectedWallet;
+  String period = 'month';
   bool loading = false;
+
+  DateTime from = DateTime.now();
+  DateTime to = DateTime.now();
+
+  Wallet? selectedWallet;
+
+  // states
+
+  String chartType = 'bar';
+
+  List<Map<String, dynamic>> data = [];
 
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    from = DateTime(now.year, now.month, 1);
+    to = DateTime(now.year, now.month + 1, 0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchTransactions();
       context.read<LoadProvider>().addListener(_onRefreshPointChanged);
@@ -65,7 +61,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     try {
       String query =
-          "?from=${toUTC(dateRange.start)}&to=${toUTC(dateRange.end)}";
+          '?from=${from.toUtc().toIso8601String()}&to=${to.toUtc().toIso8601String()}';
       if (selectedWallet != null) query += "&wallet=${selectedWallet!.id}";
 
       final res = await getMyTransactionsApi(query);
@@ -96,8 +92,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return key.contains(search.toLowerCase().trim());
     }).toList();
 
-    print(filteredTxs.length);
-
     for (var tx in filteredTxs) {
       grouped.putIfAbsent(tx.type, () => {});
       final catMap = grouped[tx.type]!;
@@ -118,39 +112,112 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void onSearchChanged(String value) {
-    print(value);
     setState(() {
       search = value.trim();
     });
     groupTransactions();
   }
 
-  void handlePrevTimeUnit() {
-    // setState(() {
-    //   dateRange = DateTimeRange(
-    //     start: subtractByUnit(dateRange.start, timeSegment),
-    //     end: subtractByUnit(dateRange.end, timeSegment),
-    //   );
-    // });
-    // fetchTransactions();
+  // MARK: Change period
+  void changePeriod(String newPeriod) {
+    if (newPeriod == period) return;
+
+    setState(() {
+      period = newPeriod;
+      final now = Moment.now();
+      from = Moment(
+        now,
+      ).startOf(DurationUnit.values.firstWhere((u) => u.name == newPeriod));
+      to = Moment(
+        now,
+      ).endOf(DurationUnit.values.firstWhere((u) => u.name == newPeriod));
+    });
+
+    fetchTransactions();
   }
 
-  void handleNextTimeUnit() {
-    // setState(() {
-    //   dateRange = DateTimeRange(
-    //     start: addByUnit(dateRange.start, timeSegment),
-    //     end: addByUnit(dateRange.end, timeSegment),
-    //   );
-    // });
-    // fetchTransactions();
+  // MARK: Next period
+  void nextPeriod() {
+    Duration unit;
+
+    switch (period) {
+      case 'week':
+        unit = const Duration(days: 7);
+        break;
+      case 'month':
+        unit = Duration(days: DateTime(from.year, from.month + 1, 0).day);
+        break;
+      case 'year':
+        unit = const Duration(days: 365);
+        break;
+      default:
+        unit = const Duration(days: 30);
+    }
+
+    final nextFrom = Moment(from).add(unit);
+    final nextTo = Moment(to).add(unit);
+
+    if (nextFrom.isAfter(DateTime.now())) return;
+
+    setState(() {
+      from = nextFrom;
+      to = nextTo;
+    });
+
+    fetchTransactions();
   }
 
-  void handleResetTimeUnit() {
-    // final now = DateTime.now();
-    // setState(() {
-    //   dateRange = getTimeRange(now, timeSegment);
-    // });
-    // fetchTransactions();
+  // MARK: Previous period
+  void previousPeriod() {
+    Duration unit;
+
+    switch (period) {
+      case 'week':
+        unit = const Duration(days: 7);
+        break;
+      case 'month':
+        unit = Duration(days: DateTime(from.year, from.month, 0).day);
+        break;
+      case 'year':
+        unit = const Duration(days: 365);
+        break;
+      default:
+        unit = const Duration(days: 30);
+    }
+
+    final prevFrom = Moment(from).subtract(unit);
+    final prevTo = Moment(to).subtract(unit);
+
+    setState(() {
+      from = prevFrom;
+      to = prevTo;
+    });
+
+    fetchTransactions();
+  }
+
+  // MARK: Reset period
+  void resetPeriod() {
+    final now = DateTime.now();
+
+    setState(() {
+      switch (period) {
+        case 'week':
+          from = Moment(now).startOf(DurationUnit.week);
+          to = Moment(now).endOf(DurationUnit.week);
+          break;
+        case 'month':
+          from = Moment(now).startOf(DurationUnit.month);
+          to = Moment(now).endOf(DurationUnit.month);
+          break;
+        case 'year':
+          from = Moment(now).startOf(DurationUnit.year);
+          to = Moment(now).endOf(DurationUnit.year);
+          break;
+      }
+    });
+
+    fetchTransactions();
   }
 
   @override
@@ -160,124 +227,119 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async => loadProvider.refresh(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // MARK: Wallet Picker
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Transactions of",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+        child: Wrapper(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // MARK: Wallet Picker
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "Transactions of",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    // Wallet picker button here if needed
-                    Expanded(
-                      child: WalletPicker(
-                        onSelectWallet: (Wallet? wallet) {
+                      // Wallet picker button here if needed
+                      Expanded(
+                        child: WalletPicker(
+                          onSelectWallet: (Wallet? wallet) {
+                            setState(() {
+                              selectedWallet = wallet;
+                            });
+                            fetchTransactions();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // MARK: Date Range Segments
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: DateRangeSegments(
+                          segment: period,
+                          segments: ['week', 'month', 'year'],
+                          onChangeSegment: changePeriod,
+                          next: nextPeriod,
+                          prev: previousPeriod,
+                          reset: resetPeriod,
+                          from: from,
+                          to: to,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // MARK: Search
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SearchInput(
+                          value: search,
+                          onChanged: onSearchChanged,
+                          placeholder: "Search...",
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/calendar'),
+                        icon: const Icon(Icons.calendar_month),
+                      ),
+                    ],
+                  ),
+
+                  // MARK: Include transfers
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: 12,
+                    children: [
+                      const Text(
+                        "Include transfers",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      Switch(
+                        value: isIncludeTransfer,
+                        onChanged: (val) {
                           setState(() {
-                            selectedWallet = wallet;
+                            isIncludeTransfer = val;
                           });
-                          fetchTransactions();
+                          groupTransactions();
                         },
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // MARK: Date Range Segments
-                DateRangeSegments(
-                  segment: timeSegment,
-                  segments: ['week', 'month', 'year'],
-                  onChangeSegment: (newSegment) {
-                    setState(() {
-                      timeSegment = newSegment;
-                      handleResetTimeUnit();
-                    });
-                  },
-                  from: dateRange.start,
-                  to: dateRange.end,
-                  // dateRange: dateRange,
-                  next: handleNextTimeUnit,
-                  prev: handlePrevTimeUnit,
-                  reset: handleResetTimeUnit,
-                  // disabledNext: dateRange.start
-                  //     .add(unitDuration(timeSegment))
-                  //     .isAfter(DateTime.now()),
-                  // disabledPrev:
-                  //     oldestDate != null &&
-                  //     dateRange.start
-                  //         .subtract(unitDuration(timeSegment))
-                  //         .isBefore(oldestDate!),
-                ),
-
-                const SizedBox(height: 12),
-
-                // MARK: Search
-                Row(
-                  children: [
-                    Expanded(
-                      child: SearchInput(
-                        value: search,
-                        onChanged: onSearchChanged,
-                        placeholder: "Search...",
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/calendar'),
-                      icon: const Icon(Icons.calendar_month),
-                    ),
-                  ],
-                ),
-
-                // MARK: Include transfers
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  spacing: 12,
-                  children: [
-                    const Text(
-                      "Include transfers",
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    Switch(
-                      value: isIncludeTransfer,
-                      onChanged: (val) {
-                        setState(() {
-                          isIncludeTransfer = val;
-                        });
-                        groupTransactions();
-                      },
-                    ),
-                  ],
-                ),
-
-                // MARK: Transaction Groups
-                ...groups.map(
-                  (group) => TransactionTypeGroup(
-                    type: group.key,
-                    categoryGroups: group.value,
-                    includeTransfers: isIncludeTransfer,
-                  ),
-                ),
-
-                if (groups.isEmpty)
-                  const Center(
-                    child: NoItemsFound(text: "No transactions found"),
+                    ],
                   ),
 
-                const SizedBox(height: 200), // padding bottom
-              ],
+                  // MARK: Transaction Groups
+                  ...groups.map(
+                    (group) => TransactionTypeGroup(
+                      type: group.key,
+                      categoryGroups: group.value,
+                      includeTransfers: isIncludeTransfer,
+                    ),
+                  ),
+
+                  if (groups.isEmpty)
+                    const Center(
+                      child: NoItemsFound(text: "No transactions found"),
+                    ),
+
+                  const SizedBox(height: 200), // padding bottom
+                ],
+              ),
             ),
           ),
         ),

@@ -22,6 +22,7 @@ class Wallets extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 21 / 2),
         child: Column(
+          spacing: 8,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,21 +61,30 @@ class Wallets extends StatelessWidget {
                 ),
               ],
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: wallets
-                    .map(
-                      (wallet) => Container(
-                        width: MediaQuery.of(context).size.width - 21,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: WalletCard(wallet: wallet),
-                      ),
-                    )
-                    .toList(),
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 780;
+                final cardWidth = isWide
+                    ? (constraints.maxWidth - 12 - 12) / 2
+                    : constraints.maxWidth - 21;
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: wallets
+                        .map(
+                          (wallet) => Container(
+                            width: cardWidth,
+                            margin: const EdgeInsets.only(right: 12),
+                            child: WalletCard(wallet: wallet),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                );
+              },
             ),
           ],
         ),

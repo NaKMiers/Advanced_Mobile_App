@@ -33,8 +33,8 @@ class Transaction {
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json['_id'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
 
       user: json['user'],
       name: json['name'],
@@ -42,7 +42,7 @@ class Transaction {
       category: Category.fromJson(json['category']),
       type: json['type'],
       amount: (json['amount'] ?? 0).toDouble(),
-      date: DateTime.parse(json['date']),
+      date: DateTime.parse(json['date']).toLocal(),
       exclude: json['exclude'] ?? false,
     );
   }

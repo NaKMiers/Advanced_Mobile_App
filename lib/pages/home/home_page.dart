@@ -4,6 +4,7 @@ import 'package:advanced_mobile_app/components/overview.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
 import 'package:advanced_mobile_app/components/wallets.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,19 +24,21 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async => loadProvider.refresh(),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            const SizedBox(height: 21 / 2),
-            Overview(),
-            const SizedBox(height: 21 / 2),
-            Wallets(wallets: wallets),
-            const SizedBox(height: 21),
-            History(),
-            const SizedBox(height: 21),
-            LatestTransactions(),
-            const SizedBox(height: 200),
-          ],
+        child: Wrapper(
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              const SizedBox(height: 21 / 2),
+              Overview(),
+              const SizedBox(height: 21 / 2),
+              Wallets(wallets: wallets),
+              const SizedBox(height: 21),
+              History(),
+              const SizedBox(height: 21),
+              LatestTransactions(),
+              const SizedBox(height: 200),
+            ],
+          ),
         ),
       ),
     );

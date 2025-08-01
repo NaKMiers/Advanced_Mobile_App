@@ -2,6 +2,7 @@ import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
+import 'package:advanced_mobile_app/utils/string.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +55,7 @@ class _TransactionCardState extends State<TransactionCard> {
         "type": widget.transaction.type,
         "walletId": widget.transaction.wallet.id,
         "categoryId": widget.transaction.category.id,
-        "date": DateTime.now().toUtc().toIso8601String(),
+        "date": DateTime.now().toIso8601String(),
       });
 
       ScaffoldMessenger.of(
@@ -66,7 +67,6 @@ class _TransactionCardState extends State<TransactionCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to duplicate transaction")),
       );
-      debugPrint(e.toString());
     } finally {
       setState(() => duplicating = false);
     }
@@ -77,9 +77,7 @@ class _TransactionCardState extends State<TransactionCard> {
     final currency =
         context.watch<SettingsProvider>().settings?.currency ?? 'USD';
 
-    final amountStr = NumberFormat.simpleCurrency(
-      name: currency,
-    ).format(widget.transaction.amount);
+    final amountStr = formatCurrency(currency, widget.transaction.amount);
     final isExpense = widget.transaction.type == 'expense';
 
     return Row(

@@ -22,7 +22,7 @@ class _Slide5State extends State<Slide5> {
             const SizedBox(height: 21),
 
             Text(
-              'Pick a personality for Deewas assistant?',
+              'Pick a personality for AMA assistant?',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,

@@ -1,7 +1,7 @@
 class User {
   final String id;
-  final String createdAt;
-  final String updatedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   final String email;
   final String? username;
@@ -41,8 +41,8 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? json['_id'] ?? '',
-      createdAt: json['createdAt'] ?? '',
-      updatedAt: json['updatedAt'] ?? '',
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
       email: json['email'] ?? '',
       username: json['username'],
       password: json['password'],
@@ -55,7 +55,7 @@ class User {
       initiated: json['initiated'] ?? false,
       plan: json['plan'] ?? 'free',
       planExpiredAt: json['planExpiredAt'] != null
-          ? DateTime.tryParse(json['planExpiredAt'])
+          ? DateTime.tryParse(json['planExpiredAt'])?.toLocal()
           : null,
       exp: json['exp'] != null ? int.tryParse(json['exp'].toString()) : null,
     );

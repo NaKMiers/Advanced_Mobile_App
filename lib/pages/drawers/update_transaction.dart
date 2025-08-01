@@ -2,6 +2,7 @@ import 'package:advanced_mobile_app/components/providers/category_provider.dart'
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
 import 'package:advanced_mobile_app/components/providers/wallet_provider.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:advanced_mobile_app/models/category_model.dart';
 import 'package:advanced_mobile_app/models/transaction_model.dart';
 import 'package:advanced_mobile_app/models/wallet_model.dart';
@@ -171,202 +172,212 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
           style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Name
-              const Text(
-                "Name",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: "...",
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+      body: Wrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name
+                const Text(
+                  "Name",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Name is required";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Amount
-              const Text(
-                "Amount",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: "...",
-                  prefixText: "$currency ",
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  final num = double.tryParse(value ?? "");
-                  if (num == null || num <= 0) {
-                    return "Amount must be greater than 0";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Type
-              const Text("Type", style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedType,
-                items: ["expense", "income", "saving", "invest"]
-                    .map(
-                      (type) => DropdownMenuItem(
-                        value: type,
-                        child: Text(
-                          type[0].toUpperCase() + type.substring(1),
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) {
-                  if (val == null) return;
-                  setState(() {
-                    selectedType = val;
-                    selectedCategory = null;
-                  });
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Category
-              const Text(
-                "Category",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: showCategoryPicker,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: theme.colorScheme.primary),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: selectedCategory != null
-                      ? Text(
-                          "${selectedCategory!.icon} ${selectedCategory!.name}",
-                        )
-                      : const Text("Select category"),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Wallet
-              const Text(
-                "Wallet",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: showWalletPicker,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: theme.colorScheme.primary),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: selectedWallet != null
-                      ? Text("${selectedWallet!.icon} ${selectedWallet!.name}")
-                      : const Text("Select wallet"),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Date
-              const Text("Date", style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) {
-                    setState(() => selectedDate = picked);
-                  }
-                },
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: theme.colorScheme.primary),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(DateFormat.yMMMd().format(selectedDate)),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Save + Cancel
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: saving ? null : _handleSave,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: "...",
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: saving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            "Save",
-                            style: TextStyle(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
                   ),
-                ],
-              ),
-            ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Name is required";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Amount
+                const Text(
+                  "Amount",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: "...",
+                    prefixText: "$currency ",
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  validator: (value) {
+                    final num = double.tryParse(value ?? "");
+                    if (num == null || num <= 0) {
+                      return "Amount must be greater than 0";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Type
+                const Text(
+                  "Type",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  items: ["expense", "income", "saving", "invest"]
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(
+                            type[0].toUpperCase() + type.substring(1),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) {
+                    if (val == null) return;
+                    setState(() {
+                      selectedType = val;
+                      selectedCategory = null;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Category
+                const Text(
+                  "Category",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: showCategoryPicker,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.colorScheme.primary),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: selectedCategory != null
+                        ? Text(
+                            "${selectedCategory!.icon} ${selectedCategory!.name}",
+                          )
+                        : const Text("Select category"),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Wallet
+                const Text(
+                  "Wallet",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: showWalletPicker,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.colorScheme.primary),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: selectedWallet != null
+                        ? Text(
+                            "${selectedWallet!.icon} ${selectedWallet!.name}",
+                          )
+                        : const Text("Select wallet"),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Date
+                const Text(
+                  "Date",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() => selectedDate = picked);
+                    }
+                  },
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.colorScheme.primary),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(DateFormat.yMMMd().format(selectedDate)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Save + Cancel
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: saving ? null : _handleSave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                      child: saving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              "Save",
+                              style: TextStyle(
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

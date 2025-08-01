@@ -30,11 +30,13 @@ import 'package:advanced_mobile_app/pages/welcome/welcome_page.dart';
 import 'package:advanced_mobile_app/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await initializeDateFormatting('en');
 
   runApp(
     MultiProvider(

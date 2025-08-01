@@ -72,7 +72,6 @@ class _TxItemState extends State<TxItem> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to duplicate transaction")),
       );
-      debugPrint(e.toString());
     } finally {
       setState(() => duplicating = false);
     }

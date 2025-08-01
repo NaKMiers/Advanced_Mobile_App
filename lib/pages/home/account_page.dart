@@ -1,5 +1,7 @@
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
 import 'package:advanced_mobile_app/components/providers/load_provider.dart';
+import 'package:advanced_mobile_app/components/currency_selector.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:advanced_mobile_app/themes/light_theme.dart';
 import 'package:advanced_mobile_app/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -30,85 +32,95 @@ class AccountPage extends StatelessWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async => loadProvider.refresh(),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1,
+        child: Wrapper(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1,
+                  ),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: user.avatar != null
+                        ? NetworkImage(user.avatar!)
+                        : null,
+                    child: user.avatar == null
+                        ? const Icon(Icons.person)
+                        : null,
+                  ),
+                  title: Text(user.name ?? user.username ?? 'Unnamed'),
+                  subtitle: Text(user.email),
                 ),
               ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: user.avatar != null
-                      ? NetworkImage(user.avatar!)
-                      : null,
-                  child: user.avatar == null ? const Icon(Icons.person) : null,
-                ),
-                title: Text(user.name ?? user.username ?? 'Unnamed'),
-                subtitle: Text(user.email),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              title: const Text('Premium Status'),
-              trailing: Text(
-                authProvider.isPremium ? 'Premium' : 'Free',
-                style: TextStyle(
-                  color: authProvider.isPremium ? Colors.green : Colors.grey,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              ListTile(
+                title: const Text('Premium Status'),
+                trailing: Text(
+                  authProvider.isPremium ? 'Premium' : 'Free',
+                  style: TextStyle(
+                    color: authProvider.isPremium ? Colors.green : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.wallet),
-              title: const Text('Wallets'),
-              onTap: () => Navigator.pushNamed(context, '/wallets'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.category),
-              title: const Text('Categories'),
-              onTap: () => Navigator.pushNamed(context, '/categories'),
-            ),
-            ListTile(
-              leading: Icon(
-                isLightTheme ? Icons.wb_sunny : Icons.nightlight_round,
-              ),
-              title: const Text('Theme'),
-              trailing: Switch(
-                value: isLightTheme,
-                onChanged: (_) => themeProvider.toggleTheme(),
-              ),
-            ),
 
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('About'),
-              onTap: () => Navigator.pushNamed(context, '/more/about'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.support),
-              title: const Text('Help & Support'),
-              onTap: () =>
-                  Navigator.pushNamed(context, '/more/help-and-support'),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: const Text('Delete All Data'),
-              onTap: () async => _confirmDelete(context, authProvider),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Log Out'),
-              onTap: () async => _confirmLogout(context, authProvider),
-            ),
-          ],
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.wallet),
+                title: const Text('Wallets'),
+                onTap: () => Navigator.pushNamed(context, '/wallets'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.category),
+                title: const Text('Categories'),
+                onTap: () => Navigator.pushNamed(context, '/categories'),
+              ),
+              ListTile(
+                leading: Icon(
+                  isLightTheme ? Icons.wb_sunny : Icons.nightlight_round,
+                ),
+                title: const Text('Theme'),
+                trailing: Switch(
+                  value: isLightTheme,
+                  onChanged: (_) => themeProvider.toggleTheme(),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('About'),
+                onTap: () => Navigator.pushNamed(context, '/more/about'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.support),
+                title: const Text('Help & Support'),
+                onTap: () =>
+                    Navigator.pushNamed(context, '/more/help-and-support'),
+              ),
+
+              const Divider(),
+              SizedBox(height: 16),
+              CurrencySelector(),
+              SizedBox(height: 16),
+
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text('Delete All Data'),
+                onTap: () async => _confirmDelete(context, authProvider),
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Log Out'),
+                onTap: () async => _confirmLogout(context, authProvider),
+              ),
+            ],
+          ),
         ),
       ),
     );

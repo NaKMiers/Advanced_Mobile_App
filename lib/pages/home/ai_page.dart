@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:advanced_mobile_app/components/ai/message_item.dart';
 import 'package:advanced_mobile_app/components/providers/init_provider.dart';
 import 'package:advanced_mobile_app/components/providers/settings_provider.dart';
+import 'package:advanced_mobile_app/components/wrapper.dart';
 import 'package:advanced_mobile_app/constants/index.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
 import 'package:advanced_mobile_app/utils/utils.dart';
@@ -37,7 +38,6 @@ class _AIPageState extends State<AIPage> {
     scrollToBottom();
 
     controller.addListener(() {
-      print('Controller text: ${controller.text}');
       setState(() {
         hasText = controller.text.isNotEmpty;
       });
@@ -60,21 +60,19 @@ class _AIPageState extends State<AIPage> {
     });
     controller.clear();
 
+    final aiPersonalities =
+        context.read<SettingsProvider>().settings?.personalities ?? [0];
+
     try {
-      final request = http.Request(
-        'POST',
-        Uri.parse("http://192.168.2.11:3000/api/ai"),
-      );
+      final request = http.Request('POST', Uri.parse("$baseUrl/api/ai"));
 
       request.headers.addAll({
         'Content-Type': 'application/json',
         'x-language': 'English',
         'x-timezone': DateTime.now().timeZoneName,
-        'x-personalities': jsonEncode([0]),
+        'x-personalities': jsonEncode(aiPersonalities),
         'Authorization': 'Bearer $token',
       });
-
-      print('messages: $messages');
 
       request.body = jsonEncode({'messages': messages});
 
@@ -151,6 +149,8 @@ class _AIPageState extends State<AIPage> {
       });
 
       context.read<InitProvider>().refreshSettings();
+
+      clearChat();
     } catch (e) {
       print("Error changing personality: $e");
     }
@@ -233,13 +233,10 @@ class _AIPageState extends State<AIPage> {
       onError: (val) => print('Speech error: $val'),
     );
 
-    print('Speech available: $available');
-
     if (available) {
       setState(() => isListening = true);
       speech.listen(
         onResult: (val) {
-          print('Speech result: ${val.recognizedWords}');
           setState(() {
             controller.text = val.recognizedWords;
           });
@@ -289,149 +286,151 @@ class _AIPageState extends State<AIPage> {
     );
 
     return Scaffold(
-      body: Column(
-        children: [
-          if (messages.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(21 / 2),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    padding: const EdgeInsets.all(21),
-                    decoration: BoxDecoration(
-                      color: theme.primary.withAlpha(10),
-                      border: Border.all(
+      body: Wrapper(
+        child: Column(
+          children: [
+            if (messages.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(21 / 2),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(21),
+                      decoration: BoxDecoration(
                         color: theme.primary.withAlpha(10),
-                        width: 2,
+                        border: Border.all(
+                          color: theme.primary.withAlpha(10),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Deewas',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500,
-                            color: theme.primary,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'AMA',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                              color: theme.primary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Deewas is a personal finance assistant that helps you manage your money wisely.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'AMA is a personal finance assistant that helps you manage your money wisely.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
+
+            // MARK: Messages
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.all(12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final msg = messages[index];
+                  return MessageItem(
+                    role: msg['role'],
+                    content: msg['content'],
+                    parts: msg['parts'],
+                  );
+                },
+              ),
             ),
 
-          // MARK: Messages
-          Expanded(
-            child: ListView.builder(
-              controller: scrollController,
-              padding: const EdgeInsets.all(12),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final msg = messages[index];
-                return MessageItem(
-                  role: msg['role'],
-                  content: msg['content'],
-                  parts: msg['parts'],
-                );
-              },
-            ),
-          ),
+            if (loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: CircularProgressIndicator(),
+              ),
 
-          if (loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: CircularProgressIndicator(),
-            ),
-
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              spacing: 4,
-              children: [
-                Row(
-                  children: [
-                    if (hasText)
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          controller.clear();
-                          FocusScope.of(context).unfocus();
-                        },
-                      ),
-                    Expanded(
-                      child: TextField(
-                        controller: controller,
-                        onSubmitted: sendMessage,
-                        decoration: InputDecoration(
-                          hintText: 'Ask something...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                spacing: 4,
+                children: [
+                  Row(
+                    children: [
+                      if (hasText)
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            controller.clear();
+                            FocusScope.of(context).unfocus();
+                          },
+                        ),
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          onSubmitted: sendMessage,
+                          decoration: InputDecoration(
+                            hintText: 'Ask something...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: () => sendMessage(controller.text),
-                    ),
-                  ],
-                ),
-                Row(
-                  spacing: 8,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // MARK: Clear Chat
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: theme.secondary,
+                      IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: () => sendMessage(controller.text),
                       ),
-                      onPressed: clearChat,
-                      child: Text(
-                        "Clear chat",
-                        style: TextStyle(color: theme.onSecondary),
-                      ),
-                    ),
-
-                    // MARK: Change Personality
-                    Expanded(
-                      child: TextButton(
+                    ],
+                  ),
+                  Row(
+                    spacing: 8,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // MARK: Clear Chat
+                      TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: theme.secondary,
                         ),
-                        onPressed: showPersonalityPicker,
+                        onPressed: clearChat,
                         child: Text(
-                          personality['title'] ?? "Change personality",
+                          "Clear chat",
                           style: TextStyle(color: theme.onSecondary),
                         ),
                       ),
-                    ),
 
-                    // MARK: Voice
-                    IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: theme.secondary,
+                      // MARK: Change Personality
+                      Expanded(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: theme.secondary,
+                          ),
+                          onPressed: showPersonalityPicker,
+                          child: Text(
+                            personality['title'] ?? "Change personality",
+                            style: TextStyle(color: theme.onSecondary),
+                          ),
+                        ),
                       ),
-                      onPressed: isListening ? stopListening : startListening,
-                      icon: Icon(isListening ? Icons.square : Icons.mic),
-                    ),
-                  ],
-                ),
-              ],
+
+                      // MARK: Voice
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: theme.secondary,
+                        ),
+                        onPressed: isListening ? stopListening : startListening,
+                        icon: Icon(isListening ? Icons.square : Icons.mic),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

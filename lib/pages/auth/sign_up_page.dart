@@ -4,6 +4,7 @@ import 'package:advanced_mobile_app/components/input.dart';
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
 import 'package:advanced_mobile_app/models/user_model.dart';
 import 'package:advanced_mobile_app/requests/index.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -136,6 +137,70 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  // MARK: Google Sign-In
+  Future<void> handleGoogleSignIn() async {
+    setState(() => loading = true);
+
+    try {
+      GoogleSignInAccount? googleUser;
+      if (kIsWeb) {
+        googleUser = await GoogleSignIn(
+          clientId:
+              '797827468455-02dfeqhp08lo9dtospe2kuq5pp6fdl72.apps.googleusercontent.com',
+        ).signIn();
+      } else {
+        googleUser = await GoogleSignIn(
+          serverClientId:
+              '797827468455-02dfeqhp08lo9dtospe2kuq5pp6fdl72.apps.googleusercontent.com',
+        ).signIn();
+      }
+
+      if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Sign-In cancelled')),
+        );
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      final response =
+          await signInGoogleApi(idToken ?? "no_token", googleUser.id, locale, {
+            'name': googleUser.displayName,
+            'email': googleUser.email,
+            'picture': googleUser.photoUrl,
+          });
+
+      final token = response['token'];
+      final decodedUser = JwtDecoder.decode(token);
+      final user = User.fromJson(decodedUser);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+
+      Provider.of<AuthProvider>(context, listen: false).setUser(user);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign In Success'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      String errorMessage = 'Unexpected error: $e';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -151,7 +216,7 @@ class _SignUpPageState extends State<SignUpPage> {
             fit: BoxFit.cover,
           ),
         ),
-        SafeArea(
+        Center(
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: SingleChildScrollView(
@@ -161,10 +226,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).padding.top + 20,
-                    ), // Adjust for SafeArea
-                    // Title
+                    SizedBox(height: MediaQuery.of(context).padding.top + 20),
+                    // MARK: Title
                     RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
@@ -175,7 +238,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                         children: [
                           const TextSpan(
-                            text: 'DEEWAS',
+                            text: 'AMA',
                             style: TextStyle(fontSize: 32),
                           ),
                           TextSpan(
@@ -192,7 +255,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     const SizedBox(height: 21),
 
-                    // Sign-up form container
+                    // MARK: Sign-up form container
                     Container(
                       constraints: const BoxConstraints(maxWidth: 400),
                       decoration: BoxDecoration(
@@ -208,7 +271,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Sign Up to Deewas',
+                            'Sign Up to AMA',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
@@ -226,6 +289,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                           // MARK: Google Sign-In Button
                           ElevatedButton(
+                            onPressed: loading ? () {} : handleGoogleSignIn,
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 48),
                             ),
@@ -238,10 +302,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                   width: 20,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text('Sign In with Facebook'),
+                                const Text('Sign In with Google'),
                               ],
                             ),
-                            onPressed: () {},
                           ),
 
                           const SizedBox(height: 24),
@@ -292,7 +355,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                           // MARK: Sign Up Button
                           ElevatedButton(
-                            onPressed: loading ? null : handleCredentialSignUp,
+                            onPressed: loading ? () {} : handleCredentialSignUp,
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 50),
                               backgroundColor: Theme.of(context).primaryColor,
@@ -302,7 +365,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             child: loading
                                 ? const CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: Colors.grey,
                                     strokeWidth: 2,
                                   )
                                 : const Text(

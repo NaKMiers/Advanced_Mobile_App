@@ -7,9 +7,6 @@ String api = '$baseUrl/api/report';
 
 // [POST]: /report/add
 Future<dynamic> sendReportApi(List<dynamic> results) async {
-  print(results);
-  print('Sending report to $api/add');
-
   final res = await http.post(
     Uri.parse('$api/add'),
     headers: {'Content-Type': 'application/json'},

@@ -106,7 +106,7 @@ class _Slide4State extends State<Slide4> {
                         children: [
                           Text(
                             currency.label,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: TextStyle(overflow: TextOverflow.ellipsis),
                           ),
                           if (isSelected)
                             const Icon(Icons.check_circle, color: Colors.green),

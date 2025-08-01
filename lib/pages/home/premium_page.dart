@@ -36,7 +36,6 @@ class _PremiumPageState extends State<PremiumPage> {
         SnackBar(content: Text("Purchased $selectedPackage successfully")),
       );
     } catch (e) {
-      print("Purchase failed: $e");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Purchase failed")));
@@ -121,7 +120,7 @@ class _PremiumPageState extends State<PremiumPage> {
                   children: [
                     const SizedBox(height: 20),
                     const Text(
-                      "DEEWAS Premium",
+                      "AMA Premium",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -197,7 +196,7 @@ class _PremiumPageState extends State<PremiumPage> {
 
                 // MARK: Reviews
                 const Text(
-                  "What are users talking about Deewas?",
+                  "What are users talking about AMA?",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),

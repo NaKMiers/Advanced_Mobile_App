@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:advanced_mobile_app/components/input.dart';
 import 'package:advanced_mobile_app/components/providers/auth_provider.dart';
 import 'package:advanced_mobile_app/models/user_model.dart';
 import 'package:advanced_mobile_app/requests/auth_requests.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -22,7 +21,6 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController passwordCtl = TextEditingController();
   bool loading = false;
   String locale = 'en';
-  final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
   Map<String, String> formErrors = {};
 
   @override
@@ -103,23 +101,24 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
-  // Handle Google Sign-In
+  // MARK: Google Sign-In
   Future<void> handleGoogleSignIn() async {
-    setState(() {
-      loading = true;
-    });
+    setState(() => loading = true);
 
     try {
-      // Check for Google Play Services (Android only)
-      if (Platform.isAndroid) {
-        final hasPlayServices = await googleSignIn.isSignedIn();
-        if (!hasPlayServices) {
-          throw Exception('Google Play Services not available');
-        }
+      GoogleSignInAccount? googleUser;
+      if (kIsWeb) {
+        googleUser = await GoogleSignIn(
+          clientId:
+              '797827468455-02dfeqhp08lo9dtospe2kuq5pp6fdl72.apps.googleusercontent.com',
+        ).signIn();
+      } else {
+        googleUser = await GoogleSignIn(
+          serverClientId:
+              '797827468455-02dfeqhp08lo9dtospe2kuq5pp6fdl72.apps.googleusercontent.com',
+        ).signIn();
       }
 
-      // Sign in with Google
-      final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Google Sign-In cancelled')),
@@ -127,13 +126,17 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
 
-      final googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final idToken = googleAuth.idToken;
-      if (idToken == null) {
-        throw Exception('ID token is required');
-      }
 
-      final response = await signInGoogleApi(idToken, googleUser.id, locale);
+      final response =
+          await signInGoogleApi(idToken ?? "no_token", googleUser.id, locale, {
+            'name': googleUser.displayName,
+            'email': googleUser.email,
+            'picture': googleUser.photoUrl,
+          });
+
       final token = response['token'];
       final decodedUser = JwtDecoder.decode(token);
       final user = User.fromJson(decodedUser);
@@ -144,30 +147,21 @@ class _SignInPageState extends State<SignInPage> {
       Provider.of<AuthProvider>(context, listen: false).setUser(user);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Sign In Success'),
+        const SnackBar(
+          content: Text('Sign In Success'),
           backgroundColor: Colors.green,
         ),
       );
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      String errorMessage;
-      if (e.toString().contains('Google Play Services')) {
-        errorMessage = 'Play services are not available';
-      } else if (e.toString().contains('ID token')) {
-        errorMessage = 'ID token is required';
-      } else {
-        errorMessage = 'Failed to sign in with Google: $e';
-      }
+      String errorMessage = 'Unexpected error: $e';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
     }
   }
 
@@ -186,7 +180,7 @@ class _SignInPageState extends State<SignInPage> {
             fit: BoxFit.cover,
           ),
         ),
-        SafeArea(
+        Center(
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: SingleChildScrollView(
@@ -208,7 +202,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                         children: [
                           const TextSpan(
-                            text: 'DEEWAS',
+                            text: 'AMA',
                             style: TextStyle(fontSize: 32),
                           ),
                           TextSpan(
@@ -239,7 +233,7 @@ class _SignInPageState extends State<SignInPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Sign In to Deewas',
+                            'Sign In to AMA',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
@@ -256,7 +250,7 @@ class _SignInPageState extends State<SignInPage> {
 
                           // MARK: Google Sign-In Buttons
                           ElevatedButton(
-                            onPressed: loading ? null : handleGoogleSignIn,
+                            onPressed: loading ? () {} : handleGoogleSignIn,
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 48),
                             ),
@@ -269,7 +263,7 @@ class _SignInPageState extends State<SignInPage> {
                                   width: 20,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text('Sign In with Facebook'),
+                                const Text('Sign In with Google'),
                               ],
                             ),
                           ),
@@ -351,7 +345,7 @@ class _SignInPageState extends State<SignInPage> {
 
                           // MARK: Sign In Button
                           ElevatedButton(
-                            onPressed: loading ? null : handleCredentialSignIn,
+                            onPressed: loading ? () {} : handleCredentialSignIn,
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 50),
                               backgroundColor: Colors.black,
@@ -362,7 +356,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             child: loading
                                 ? const CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: Colors.grey,
                                     strokeWidth: 2,
                                   )
                                 : const Text(
